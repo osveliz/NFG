@@ -42,6 +42,7 @@ public class GenericTensor<T> {
   /**
    * Initialize the data structure
    * This will clear all existing data
+   * @param dimSize dimension size
    */
   public void init(int[] dimSize) {
     numDimensions = dimSize.length;
@@ -61,6 +62,8 @@ public class GenericTensor<T> {
    * an index of the underlying values array.  Assumes
    * that each index in the array is between 1 and the size
    * of that dimension.
+   * @param indicies for translation
+   * @return translation
    */
   private int translateIndices(int[] indices) {
     int valueIndex = indices[0] - 1;
@@ -75,6 +78,8 @@ public class GenericTensor<T> {
 
   /**
    * Set the value stored at the indexed spot in the tensor
+   * @param value T
+   * @param indices indices
    */
   public void setValue(T value, int[] indices) {
     int valueIndex = translateIndices(indices);
@@ -83,6 +88,8 @@ public class GenericTensor<T> {
 
   /**
    * Set a value by directly specifying the index
+   * @param value T
+   * @param index the index
    */
   public void setValue(T value, int index) {
     values[index] = value;
@@ -90,6 +97,8 @@ public class GenericTensor<T> {
 
   /**
    * Get the value stored at the indexed spot in the tensor
+   * @param indices the indeces
+   * @return the value
    */
   public T getValue(int[] indices) {
     int valueIndex = translateIndices(indices);
@@ -98,23 +107,41 @@ public class GenericTensor<T> {
 
   /**
    * Access a tensor element by directly specifying the index
+   * @param index the index
+   * @return the value
    */
   public T getValue(int index) {
     return values[index];
   }
 
+/**
+ * tensor size
+ * @return size
+ */
   public int size() {
     return size;
   }
 
+/**
+ * the number of dimensions
+ * @return the number of dimensions
+ */
   public int getNumDimensions() {
     return numDimensions;
   }
 
+/**
+ * the size of dimensions
+ * @param dim dim index
+ * @return the size
+ */
   public int getSizeOfDim(int dim) {
     return dimensionSize[dim];
   }
-
+/**
+ * get all of the dim sizes
+ * @return array of dims
+ */
   public int[] getSizeOfDim()  {
     return dimensionSize;
   }

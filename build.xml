@@ -1,7 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project name="NFG" basedir="." default="main">
 
     <property name="src.dir"     value="src"/>
     <property name="build.dir"   value="build"/>
+    <property name="doc.dir" location="doc"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
     <property name="jar.dir"     value="${build.dir}/jar"/>
 
@@ -25,6 +27,11 @@
             </manifest>
         </jar>
     </target>
+    
+    <target name="doc" depends="" description="generate documentation">
+		<mkdir dir="${doc.dir}"/>
+		<javadoc sourcepath="${src.dir}" destdir="${doc.dir}" additionalparam="-html5"/>
+	</target>
 
     <target name="run" depends="jar">
         <java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>

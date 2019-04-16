@@ -72,7 +72,9 @@ public abstract class Player
 
     /**
      * Player logic goes here in extended super agent. Do not try to edit this agent
-     * 
+     * @param mg the game
+     * @param playerNum the player number
+     * @return the mixed strategy
      */
     protected MixedStrategy solveGame(MatrixGame mg, int playerNum){
     	this.setGame(mg);
@@ -102,7 +104,7 @@ public abstract class Player
      * Standard accessor
      * @param index Game Number
      * @param playerNum Row Player = 1, Column Player = 2
-     * @return
+     * @return the mixed strategy
      */
     public MixedStrategy getStrategy(int index, int playerNum){
     	if(index > strategies.size())

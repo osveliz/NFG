@@ -15,7 +15,7 @@ import games.*;
  */
 public class GameMaster {
 
-	private static boolean verbose = true; //Set to false if you do not want the details
+	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int numGames = 10; //test with however many games you want
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();

@@ -40,9 +40,8 @@ public class StrategyHolder {
 	
 	/**
 	 * Get the stored strategy for a player
-	 * @param ms A strategy
 	 * @param playerNum Row Player = 1, Column Player = 2
-	 * @return
+	 * @return the mixed strategy
 	 */
 	public MixedStrategy getStrategy(int playerNum){
 		if(playerNum == 1)

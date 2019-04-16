@@ -20,7 +20,7 @@ public class EGAUtils {
   // this is a Mersenne Twister generator, which has a very long period and other advangtages oover
   // the standard java Random implementation.
   // this implementation is an extension of the base java.Random class
-  public static final Random rand = new MTRandom();
+  public static final Random rand = new Random();
 
   // a different implementation of the Mersenne Twister random number generator
   // this version does not extend the java.Random, so it is a bit less useable
