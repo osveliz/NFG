@@ -11,11 +11,11 @@ import games.*;
  * Normal Form Round-Robin Tournament Simulator (NFRRTS for short, we'll keep working on the name)
  * 
  * @author Marcus Gutierrez and Oscar Veliz
- * @version 2015.10.03
+ * @version 2019.04.15
  */
 public class GameMaster {
 
-	private static boolean verbose = false; //Set to false if you do not want the details
+	private static boolean verbose = true; //Set to false if you do not want the details
 	private static int numGames = 10; //test with however many games you want
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
@@ -32,63 +32,78 @@ public class GameMaster {
 		//add your agent(s) here
 		
 		//you can comment these next two lines of code if you've already generated the games
-		GameGenerator.zeroSum(numGames);
-		GameGenerator.generalSum(numGames);
+		//GameGenerator.zeroSum(numGames);
+		//GameGenerator.generalSum(numGames);
+		ArrayList<MatrixGame> classA = GameGenerator.classA(numGames);
+		ArrayList<MatrixGame> classG = GameGenerator.classG(numGames);
+		ArrayList<MatrixGame> classZ = GameGenerator.classZ(numGames);
 		
-		if(zeroSum)
-			System.out.println("Zero Sum Tournament");
-		else
-			System.out.println("General Sum Tounament");
-		
-		readGames();
-		if(games.size()==0){//safety net
-			System.out.println("Could Not Read Games");
-			System.exit(0);
-		}
-		
-		computeStrategies(players);
-		
-		//compute expected payoffs
-		double[][] payoffMatrix = new double[players.size()][players.size()];
-		double[] wins = new double[players.size()];
-		int numPlayers = players.size();
-		for(int p1 = 0; p1 < numPlayers; p1++) {
-			for(int p2 = p1; p2 < numPlayers; p2++) {
-				for (int game = 0; game < numGames; game++) {
-					Player player1 = players.get(p1);
-					Player player2 = players.get(p2);
-					if(verbose)	System.out.println("Game number" + game);
-					if(verbose) System.out.println(player1.getName()+" vs "+player2.getName());
-					double[] payoffs = match(player1,player2,game);
-					updateResults(payoffMatrix,payoffs,p1,p2,wins);
-					if(verbose) System.out.println(payoffs[0]);
-					if(verbose) System.out.println(payoffs[1]);
-					if(verbose) System.out.println(player2.getName()+" vs "+player1.getName());
-					payoffs = match(player2,player1,game);
-					updateResults(payoffMatrix,payoffs,p2,p1,wins);
-					if(verbose) System.out.println(payoffs[0]);
-					if(verbose) System.out.println(payoffs[1]);
-					if(verbose) System.out.println();
+		for(int type = 0; type < 3; type++){
+			switch(type){
+				case 0:
+					System.out.println("Zero Sum Tournament");
+					games = classZ;
+					break;
+				case 1:
+					System.out.println("General Sum Tounament");
+					games = classG;
+					break;
+				default:
+					System.out.println("Class A Tournament");
+					games = classA;
+					break;
+			}
+			//readGames();
+			if(games.size()==0){//safety net
+				System.out.println("Could Not Read Games");
+				System.exit(0);
+			}
+			
+			computeStrategies(players);
+			
+			
+			//compute expected payoffs
+			double[][] payoffMatrix = new double[players.size()][players.size()];
+			double[] wins = new double[players.size()];
+			int numPlayers = players.size();
+			for(int p1 = 0; p1 < numPlayers; p1++) {
+				for(int p2 = p1; p2 < numPlayers; p2++) {
+					for (int game = 0; game < numGames; game++) {
+						Player player1 = players.get(p1);
+						Player player2 = players.get(p2);
+						if(verbose)	System.out.println("Game number" + game);
+						if(verbose) System.out.println(player1.getName()+" vs "+player2.getName());
+						double[] payoffs = match(player1,player2,game);
+						updateResults(payoffMatrix,payoffs,p1,p2,wins);
+						if(verbose) System.out.println(payoffs[0]);
+						if(verbose) System.out.println(payoffs[1]);
+						if(verbose) System.out.println(player2.getName()+" vs "+player1.getName());
+						payoffs = match(player2,player1,game);
+						updateResults(payoffMatrix,payoffs,p2,p1,wins);
+						if(verbose) System.out.println(payoffs[0]);
+						if(verbose) System.out.println(payoffs[1]);
+						if(verbose) System.out.println();
+					}
 				}
 			}
+			//average the payoff matrix
+			for(int i = 0; i < payoffMatrix.length; i++)
+				for(int j= 0; j < payoffMatrix[i].length; j++)
+					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length);	
+			if(verbose) printMatrix(payoffMatrix,players);
+			
+			//compute results
+			double[] expPayoff = calculateAverageExpectedPayoffs(payoffMatrix);
+			double[] regrets = calculateRegrets(payoffMatrix);
+			double[] stabilities = calculateStabilities(payoffMatrix);
+			double[] reverse = calculateReversePayoffs(payoffMatrix);
+			//print summary regardless of verbose
+			playerArrayPrinter("Total Wins",players, wins);
+			playerArrayPrinter("Overall Average Expected Utility", players, expPayoff);
+			playerArrayPrinter("Tournament Regret",players,regrets);
+			playerArrayPrinter("Tournament Stabilities",players,stabilities);
+			playerArrayPrinter("Expected Reverse Utility",players,reverse);
 		}
-		//average the payoff matrix
-		for(int i = 0; i < payoffMatrix.length; i++)
-			for(int j= 0; j < payoffMatrix[i].length; j++)
-				payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length);	
-		if(verbose) printMatrix(payoffMatrix,players);
-		
-		//compute results
-		double[] expPayoff = calculateAverageExpectedPayoffs(payoffMatrix);
-		double[] regrets = calculateRegrets(payoffMatrix);
-		double[] stabilities = calculateStabilities(payoffMatrix);
-		double[] reverse = calculateReversePayoffs(payoffMatrix);
-		//print summary regardless of verbose
-		playerArrayPrinter("Total Wins",players, wins);
-		playerArrayPrinter("Overall Average Expected Utility", players, expPayoff);
-		playerArrayPrinter("Tournament Regret",players,regrets);
-		playerArrayPrinter("Tournament Stabilities",players,stabilities);
-		playerArrayPrinter("Expected Reverse Utility",players,reverse);
 		System.exit(0);//just to make sure it exits
 	}
 
@@ -123,8 +138,8 @@ public class GameMaster {
 			for(int playerIndex = 0; playerIndex < p.size(); playerIndex++){
 				Player player = p.get(playerIndex);
 				for(int playerNumber = 1; playerNumber <= 2; playerNumber++){
-					player.setGame(gameNumber);
-					player.setGame(mg);
+					player.setGame(gameNumber);//legacy
+					player.setGame(new MatrixGame(mg));
 					player.setPlayerNumber(playerNumber);
 					tryPlayer(new PlayerDriver(PlayerState.SOLVE,player));
 				}
