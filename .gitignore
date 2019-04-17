@@ -48,3 +48,9 @@ Temporary Items
 *.game
 *.class
 *.jar
+*.html
+*.js
+*.png
+*.css
+*.zip
+doc/package-list
