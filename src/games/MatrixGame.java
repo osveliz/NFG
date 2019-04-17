@@ -12,9 +12,10 @@ public class MatrixGame extends Game {
 
   /**
    * Constructor for a new matrix game.
+   * @param numPlayers the number of players
+   * @param numActions the number of actions
    */
-  public MatrixGame(int numPlayers, int[] numActions)
-  {
+  public MatrixGame(int numPlayers, int[] numActions){
     super(numPlayers, numActions);
     payoffs = new GenericTensor<Payoffs>(numActions);
     init();
@@ -22,6 +23,7 @@ public class MatrixGame extends Game {
 
   /**
    * Create a copy of the given game as a matrix game
+   * @param game convert type Game to MatrixGame
    */
   public MatrixGame(Game game) {
     super(game.getNumPlayers(), game.getNumActions());
@@ -48,11 +50,10 @@ public class MatrixGame extends Game {
 
   /**
    * Returns the payoffs for a particular outcome
-   *
    * @param outcome   an array containing the actions chosen by each player
+   * @return the payoffs
    */
-  public double[] getPayoffs(int[] outcome)
-  {
+  public double[] getPayoffs(int[] outcome){
     return payoffs.getValue(outcome).getPayoffs();
   }
 
@@ -63,20 +64,16 @@ public class MatrixGame extends Game {
    * @param player    the player whose payoff should be returned.
    * @param value     the amount of the payoff
    */
-  public void setPayoff(int[] outcome, int player, double value)
-  {
+  public void setPayoff(int[] outcome, int player, double value){
     payoffs.getValue(outcome).setPayoff(player, value);
   }
 
   /**
    * Sets the payoffs for all players
-   *
    * @param outcome action choices for each player
    * @param values payoff values for each player
-   *
    */
-  public void setPayoffs(int[] outcome, double[] values)
-  {
+  public void setPayoffs(int[] outcome, double[] values){
     payoffs.getValue(outcome).setPayoffs(values);
   }
 }

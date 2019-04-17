@@ -120,6 +120,7 @@ public class GameGenerator {
 	/**
 	 * Generates Class A Games
 	 * @param numGames the number of games to generate.
+	 * @return the games
 	 */
 	public static ArrayList<MatrixGame> classA(int numGames) {
 		Random r = new Random();
@@ -158,6 +159,7 @@ public class GameGenerator {
 	/**
 	 * Generates general sum games
 	 * @param numGames the number of games to generate.
+	 * @return the games
 	 */
 	public static ArrayList<MatrixGame> classG(int numGames) {
 		Random r = new Random();
@@ -185,6 +187,7 @@ public class GameGenerator {
 	/**
 	 * Generates zero sum games
 	 * @param numGames the number of games to generate.
+	 * @return the games
 	 */
 	public static ArrayList<MatrixGame> classZ(int numGames) {
 		Random r = new Random();

@@ -149,7 +149,6 @@ public class GameMaster {
 	
 	/**
 	 * Reads all the games used in the tournament
-	 * @param numGames
 	 */
 	public static void readGames(){
 		String type = "";
@@ -171,7 +170,7 @@ public class GameMaster {
 	 * @param p1 row player
 	 * @param p2 column player
 	 * @param gameNumber game
-	 * @return
+	 * @return the payoffs of the match
 	 */
 	public static double[] match(Player p1, Player p2, int gameNumber){
 		MixedStrategy[] strats = new MixedStrategy[2];
@@ -243,6 +242,7 @@ public class GameMaster {
 	}
 	/**
 	 * Calculate average expected payoffs for each player
+	 * @param matrix the tournament payoff matrix
 	 * @return average expected payoffs
 	 */
 	public static double[] calculateAverageExpectedPayoffs(double[][] matrix){
@@ -257,6 +257,7 @@ public class GameMaster {
 	}
 	/**
 	 * Calculates the regrets for every agent and stores them in the array.
+	 * @param matrix the tournament payoffs
 	 * @return array of regrets in the tournament
 	 */
 	public static double[] calculateRegrets(double[][] matrix) {
@@ -272,7 +273,8 @@ public class GameMaster {
 	
 	/**
 	 * Calculates the average payoffs scored against each agent (the reverse payoff)
-	 * @return array of reverse payoffs
+	 * @param matrix array of tournament payoffs
+	 * @return the reverse of how the players did
 	 */
 	public static double[] calculateReversePayoffs(double[][] matrix){
 		double[] reverse = new double[matrix.length];
@@ -288,6 +290,8 @@ public class GameMaster {
 	/**
 	 * Calculates the stabilities for every agents and stores them in the array.
 	 * (Taken from  GameUtils class in ega.games package.)
+	 * @param matrix the payoffs in the tournament
+	 * @return stability value (how likely to switch strategies)
 	 */
 	public static double[] calculateStabilities(double[][] matrix){
 		double[] stabilities = new double[matrix.length];
@@ -320,6 +324,9 @@ public class GameMaster {
 	
 	/**
 	 * Player Array printer
+	 * @param text general text usually a heading
+	 * @param players the list of players
+	 * @param array the values to be printed
 	 */
 	public static void playerArrayPrinter(String text, ArrayList<Player> players, double[] array){
 		System.out.println("\n"+text);

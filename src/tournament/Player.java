@@ -31,7 +31,7 @@ public abstract class Player
 
     /**
      * Set game
-     * @param the game in matrix form
+     * @param game the game in matrix form
      */
     public void setGame(MatrixGame game){
     	this.game = game;
@@ -52,13 +52,14 @@ public abstract class Player
     }
     /**
      * Set player number
+     * @param playerNumber the player number (starts at 1)
      */
     public void setPlayerNumber(int playerNumber){
     	this.playerNumber = playerNumber;
     }
     /**
      * Standard accessor get current player number
-     * @return
+     * @return the player number
      */
     public int getPlayerNumber(){
     	return playerNumber;

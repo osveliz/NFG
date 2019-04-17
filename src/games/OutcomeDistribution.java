@@ -13,7 +13,11 @@ public final class OutcomeDistribution {
   private final int nPlayers;
   private final int[] nActions;
   private final GenericTensor<Double> probs;
-
+  
+  /**
+   * copy constructor
+   * @param original what to be copied
+   */
   public OutcomeDistribution(OutcomeDistribution original) {
     this.nPlayers = original.getNumPlayers();
     this.nActions = original.getNumActions().clone();
@@ -29,6 +33,7 @@ public final class OutcomeDistribution {
   /**
    * Create a new distribution object
    * Initialized by default to the centroid (equal probabilities for all outcomes)
+   * @param nActions the number of actions
    */
   public OutcomeDistribution(int[] nActions) {
     this.nPlayers = nActions.length;
@@ -40,6 +45,8 @@ public final class OutcomeDistribution {
   /**
    * Create a new distribution object
    * Initial all probabilities to the given value
+   * @param nActions the number of actions
+   * @param initialValue what to initialize them to
    */
   public OutcomeDistribution(int[] nActions, double initialValue) {
     this.nPlayers = nActions.length;
@@ -50,6 +57,7 @@ public final class OutcomeDistribution {
 
   /**
    * Create a new distribution object based on the joint mixed strategies given
+   * @param strategies a list of mixed strategies
    */
   public OutcomeDistribution(List<MixedStrategy> strategies) {
     if (strategies.size() == 0) {
@@ -71,6 +79,8 @@ public final class OutcomeDistribution {
 
   /**
    * Creates a new distribution based on a set of outcomes, with equal weight given to all
+   * @param nActions the number of actions
+   * @param outcomes a collection of outcomes
    */
   public OutcomeDistribution(int[] nActions, Collection<int[]> outcomes) {
     this.nPlayers = nActions.length;
@@ -79,13 +89,18 @@ public final class OutcomeDistribution {
     setOutcomeSet(outcomes);
   }
 
-  // gets an iterator for this distribution
+  /**
+   * gets an iterator for this distribution
+   * @return the outcome iterater
+   */
   public OutcomeIterator iterator() {
     return new OutcomeIterator(nPlayers, nActions);
   }
 
   /**
    * Returns the conditional distribution for the given restriction set
+   * @param restrictedPlayers avoid these players
+   * @return the conditional distribrution
    */
   public OutcomeDistribution getConditionalDistribution(List<Integer> restrictedPlayers) {
     if (restrictedPlayers.size() >= nPlayers) return null;
@@ -124,12 +139,18 @@ public final class OutcomeDistribution {
     }
     return conditional;
   }
-
-
+/**
+ * get the number of actions
+ * @return the number of action
+ */
   public int[] getNumActions() {
     return nActions;
   }
 
+/**
+ * get the number of players
+ * @return the number of players
+ */
   public int getNumPlayers() {
     return nPlayers;
   }
@@ -159,7 +180,9 @@ public final class OutcomeDistribution {
     setAll(tmpProb);
   }
 
-  // set a single profile chosen at uniform random as the predictions
+  /**
+   * set a single profile chosen at uniform random as the predictions
+   */
   public void setRandomPureProfile() {
     int r = EGAUtils.rand.nextInt(probs.size());
     probs.setValue(1d, r);
@@ -180,6 +203,7 @@ public final class OutcomeDistribution {
 
   /**
    * Sets the distribution based on the given mixed strategies
+   * @param strategies the list of mixed strategies
    */
   public void setMixedStrategies(List<MixedStrategy> strategies) {
     if (strategies.size() != nPlayers) {
@@ -200,6 +224,7 @@ public final class OutcomeDistribution {
 
   /**
    * Sets the distribution to an even distribution over the given outcomes
+   * @param outcomes the set of outcomes
    */
   public void setOutcomeSet(Collection<int[]> outcomes) {
     setAll(0d);
@@ -208,7 +233,10 @@ public final class OutcomeDistribution {
       probs.setValue(tmpProb, outcome);
     }
   }
-
+  /**
+   * Legacy
+   * @param outcome the outcome to set
+   */
   public void setPureOutcome(int[] outcome) {
     setAll(0d);
     probs.setValue(1d, outcome);
@@ -230,19 +258,28 @@ public final class OutcomeDistribution {
       probs.setValue(probs.getValue(i) / sum, i);
     }
   }
-
+  
+  /**
+   * Initialize the probability of an outcome
+   * @param outcome to be set
+   * @param value to be set
+   */
   public void setProb(int[] outcome, double value) {
     probs.setValue(value, outcome);
   }
-
+  
+  /**
+   * get the probability of an outcome
+   * @param outcome the outcome
+   * @return the probability
+   */
   public double getProb(int[] outcome) {
     return probs.getValue(outcome);
   }
 
   /**
    * Check whether this is a valid probability distribution (sums to 1)
-   * Uses a tolerance of 0.01, so anything between 0.99 and 1.01 is "valid"
-   *
+   * Uses a tolerance of 0.01, so anything between 0.99 and 1.01 is valid
    * @return true if distribution sums to 1, false otherwise
    */
   public boolean isValid() {
@@ -250,7 +287,10 @@ public final class OutcomeDistribution {
     return sum > 0.99d && sum < 1.01d;
   }
 
-  // compute the sum of the values for all profiles
+  /**
+   * compute the sum of the values for all profiles
+   * @return the sum
+   */
   private double computeSum() {
     int nProfiles = probs.size();
     double sum = 0d;
@@ -260,7 +300,10 @@ public final class OutcomeDistribution {
     return sum;
   }
 
-  // returns the information entropy of this distribution
+  /**
+   * returns the information entropy of this distribution
+   * @return entropy
+   */
   public double computeEntropy() {
     int nProfiles = probs.size();
     double entropy = 0d;
@@ -277,9 +320,12 @@ public final class OutcomeDistribution {
     return entropy;
   }
 
-  // computes a mixture of this distribution with the uniform distribution
-  // with probability delta, the distribution of play is uniform
-  // with probability 1-delta, the distribution of play is the current distribution
+  /**
+   * computes a mixture of this distribution with the uniform distribution
+   * with probability delta, the distribution of play is uniform
+   * with probability 1-delta, the distribution of play is the current distribution
+   * @param delta see above description
+   */
   public void mixWithUniform(double delta) {
     int nProfiles = probs.size();
     double uniformProb = delta / nProfiles;
@@ -291,7 +337,10 @@ public final class OutcomeDistribution {
     }
   }
 
-  // select a random profile according to this outcome distribution
+  /**
+   * select a random profile according to this outcome distribution
+   * @return random profile
+   */
   public int[] sampleDistribution() {
     for (int i = 0; i < 5; i++) {
       OutcomeIterator itr = iterator();
@@ -310,7 +359,10 @@ public final class OutcomeDistribution {
     return tmp;
   }
 
-  // returns a string distribution of the distribution
+  /**
+   * returns a string distribution of the distribution
+   * @return standard toString()
+   */
   public String toString() {
     StringBuilder sb = EGAUtils.getSB();
     OutcomeIterator itr = iterator();
@@ -327,6 +379,3 @@ public final class OutcomeDistribution {
     return tmp;
   }
 }
-
-
-

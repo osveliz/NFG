@@ -17,6 +17,8 @@ public abstract class Game {
 
   /**
    * Standard constructor
+   * @param numPlayers the number of players
+   * @param numActions the number of actions
    */
   protected Game(int numPlayers, int[] numActions) {
     this.description = "";
@@ -27,6 +29,8 @@ public abstract class Game {
 
   /**
    * Constructor for creating games with the same number of actions for all players
+   * @param numPlayers the number of players
+   * @param numActions the number of actions
    */
   protected Game(int numPlayers, int numActions) {
     this.description = "";
@@ -52,6 +56,7 @@ public abstract class Game {
 
   /**
    * Returns Game Description (Name, Params, etc)
+   * @return the description
    */
   public String getDescription() {
     return description;
@@ -69,6 +74,7 @@ public abstract class Game {
 
   /**
    * Returns the number of players in this game
+   * @return the number of players
    */
   public int getNumPlayers() {
     return nPlayers;
@@ -78,16 +84,16 @@ public abstract class Game {
    * Returns the number of actions of the given player
    * or a vector of Integers with the numbers of actions.
    *
-   * @param player the index of the player whose actions should
-   *               be returned
+   * @param player the index of the player whose actions should be returned
+   * @return the number of actions
    */
   public int getNumActions(int player) {
     return nActions[player];
   }
 
   /**
-   * Returns an array containing the number of actions that each
-   * player has.
+   * Returns an array containing the number of actions that each player has.
+   * @return the number of actions
    */
   public int[] getNumActions() {
     return nActions.clone();
@@ -95,12 +101,16 @@ public abstract class Game {
 
   /**
    * Returns the total number of outcome profiles for this game
+   * @return the number of profiles
    */
   public int getNumProfiles() {
     return nProfiles;
   }
 
-  // returns a random profile of this game
+  /**
+   * returns a random profile of this game
+   * @return a random profile of this game
+   */
   public int[] getRandomProfile() {
     int[] profile = new int[nPlayers];
     for (int pl = 0; pl < nPlayers; pl++) {
@@ -109,7 +119,10 @@ public abstract class Game {
     return profile;
   }
 
-  // returns a random profile in the given object
+  /**
+   * returns a random profile in the given object
+   * @param profileHolder the profile holder
+   */
   public void getRandomProfile(int[] profileHolder) {
     if (profileHolder.length != nPlayers) return;
     for (int pl = 0; pl < nPlayers; pl++) {
@@ -119,6 +132,7 @@ public abstract class Game {
 
   /**
    * Returns the total number of possible unilateral deviations from any profile
+   * @return the number of possible deviations
    */
   public int getNumPossibleDeviations() {
     return nDeviations;
@@ -126,12 +140,14 @@ public abstract class Game {
 
   /**
    * Get an iterator for looping over the outcomes of this game
+   * @return the outcome iterator
    */
   public OutcomeIterator iterator() {
     return new OutcomeIterator(this);
   }
 
   /**
+   * Get the payoff range
    * @return the difference between the max and min payoffs in the game
    */
   public double getPayoffRange() {
@@ -141,6 +157,7 @@ public abstract class Game {
 
   /**
    * Get the maximum and minimum payoffs for the game over all players: [max, min]
+   * @return the extreme payoffs
    */
   public double[] getExtremePayoffs() {
     double max = Double.NEGATIVE_INFINITY;
@@ -155,17 +172,17 @@ public abstract class Game {
         min = Math.min(min, tmp);
       }
     }
-
     return new double[] {max, min};
   }
 
   /**
    * Get the maximum and minimum payoffs for a particular player
+   * @param player the player number
+   * @return the extreme payoffs
    */
   public double[] getExtremePayoffs(int player) {
     double max = Double.NEGATIVE_INFINITY;
     double min = Double.POSITIVE_INFINITY;
-
     OutcomeIterator itr = iterator();
     while (itr.hasNext()) {
       int[] outcome = itr.next();
@@ -173,7 +190,6 @@ public abstract class Game {
       max = Math.max(max, payoff);
       min = Math.min(min, payoff);
     }
-
     return new double[] {max, min};
   }
 
@@ -182,6 +198,7 @@ public abstract class Game {
    *
    * @param outcome action choices for all players
    * @param player  player whose payoff to return
+   * @return the payoff
    */
   public double getPayoff(int[] outcome, int player) {
     return getPayoffs(outcome)[player];
@@ -191,6 +208,7 @@ public abstract class Game {
    * Returns payoffs for all players
    *
    * @param outcome action choices for all players
+   * @return the payoffs
    */
   public abstract double[] getPayoffs(int[] outcome);
 }

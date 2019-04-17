@@ -5,7 +5,6 @@ import java.util.*;
 /**
  * A class the encapsulates the notion of a mixed strategy:
  * the probability of playing each action, summing to 1
- * <p/>
  * Note: strategies are labeled 1..numActions
  */
 
@@ -16,6 +15,7 @@ public final class MixedStrategy {
 
   /**
    * Create a new mixed strategy object representing these probabilities
+   * @param probs the strategy probabilities to set
    */
   public MixedStrategy(double[] probs) {
     this.probs = new double[probs.length];
@@ -26,6 +26,7 @@ public final class MixedStrategy {
   /**
    * Create a new mixed strategy for the given number of actions;
    * defaults to uniform mixture
+   * @param nActions the number of actions
    */
   public MixedStrategy(int nActions) {
     this.nActions = nActions;
@@ -37,6 +38,8 @@ public final class MixedStrategy {
   /**
    * Create a new mixed strategy for the given number of actions;
    * initial probability of each action is given
+   * @param nActions the number of actions
+   * @param initialValue the initial value
    */
   public MixedStrategy(int nActions, double initialValue) {
     this.nActions = nActions;
@@ -47,6 +50,7 @@ public final class MixedStrategy {
 
   /**
    * Returns the number of actions represented
+   * @return the number of actions
    */
   public int getNumActions() {
     return nActions;
@@ -54,6 +58,8 @@ public final class MixedStrategy {
 
   /**
    * Returns the probability of playing a particular action
+   * @param action the action you want the probability of
+   * @return that action's probability
    */
   public double getProb(int action) {
     if (action > 0) {
@@ -65,6 +71,7 @@ public final class MixedStrategy {
 
   /**
    * Return all action probabilities as an array
+   * @return the action probabilities
    */
   public double[] getProbs() {
     return probs;
@@ -97,6 +104,8 @@ public final class MixedStrategy {
 
   /**
    * Set the probability of playing a given action
+   * @param action action number
+   * @param prob the probability to set
    */
   public void setProb(int action, double prob) {
     if (action > 0) {
@@ -106,6 +115,7 @@ public final class MixedStrategy {
 
   /**
    * Set all action probabilities
+   * @param probs the probabilities
    */
   public void setProbs(double[] probs) {
     if (probs.length - 1 != nActions) {
@@ -114,7 +124,11 @@ public final class MixedStrategy {
     }
     System.arraycopy(probs, 1, this.probs, 1, probs.length - 1);
   }
-
+  
+  /**
+   * set the mixed strategy
+   * @param ms the mixed strategy
+   */
   public void setProbs(MixedStrategy ms) {
     if (ms.getNumActions() != nActions) {
       System.err.println("Warning: trying to copy mixed strategy with invalid number of actions!");
@@ -164,7 +178,10 @@ public final class MixedStrategy {
     }
   }
 
-  // play randomly with probability delta; the current mixture with probability 1-delta
+  /**
+   * play randomly with probability delta; the current mixture with probability 1-delta
+   * @param delta see above
+   */
   public void mixWithUniform(double delta) {
     double uniformProb = delta / nActions;
     for (int i = 1; i <= nActions; i++) {
@@ -175,6 +192,7 @@ public final class MixedStrategy {
 
   /**
    * Determines whether the probabilities sum to 1 (within a tolerance of 0.01)
+   * @return true when value false otherwise
    */
   public boolean isValid() {
     double sum = 0;
@@ -186,6 +204,7 @@ public final class MixedStrategy {
 
   /**
    * Returns a string representation of the mixed strategy
+   * @return standard toString()
    */
   public String toString() {
     StringBuilder sb = EGAUtils.getSB();
@@ -201,6 +220,3 @@ public final class MixedStrategy {
     return tmp;
   }
 }
-
-
-
