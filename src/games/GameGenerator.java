@@ -1,11 +1,9 @@
 package games;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import games.*;
+import util.*;
 /**
  * Uses Gamut.jar to generate games. Make sure Gamut.jar is saved where you found it do not move it.
  * @author Oscar
@@ -123,6 +121,16 @@ public class GameGenerator {
 	 * @return the games
 	 */
 	public static ArrayList<MatrixGame> classA(int numGames) {
+		return classA(numGames, new Parameters());
+	}
+	
+	/**
+	 * Generates Class A Games
+	 * @param numGames the number of games to generate.
+	 * @param p Settings
+	 * @return the games
+	 */
+	public static ArrayList<MatrixGame> classA(int numGames, Parameters p) {
 		Random r = new Random();
 		ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 		int[] actions = {10,10};
@@ -130,24 +138,20 @@ public class GameGenerator {
 		for(int i = 0; i < numGames; i++){
 			r.setSeed(i);
 			MatrixGame g = new MatrixGame(2,actions);
-			g.setDescription("A"+i);
+			g.setDescription(""+i);
 			for(int row = 1; row <= actions[0]; row++){
 				double base = 50 - row / 2;
-				//double variance = r.nextGaussian()*(row+1);
 				for(int col = 1; col <= actions[1]; col++){
 					outcome[0] = row;
 					outcome[1] = col;
-					//System.out.println(Arrays.toString(outcome));
 					g.setPayoff(outcome,0, base + r.nextGaussian()*(row+1));
 				}
 			}
 			for(int col = 1; col <= actions[1]; col++){
 				double base = 50 - col / 2;
-				//double variance = r.nextGaussian()*(row+1);
 				for(int row = 1; row <= actions[0]; row++){
 					outcome[0] = row;
 					outcome[1] = col;
-					//System.out.println(Arrays.toString(outcome));
 					g.setPayoff(outcome,1, base + r.nextGaussian()*(col+1));
 				}
 			}
@@ -157,26 +161,77 @@ public class GameGenerator {
 	}
 	
 	/**
-	 * Generates general sum games
+	 * Generates general sum games with default parameters
 	 * @param numGames the number of games to generate.
 	 * @return the games
 	 */
 	public static ArrayList<MatrixGame> classG(int numGames) {
+		return classG(numGames, new Parameters());
+	}
+	
+	/**
+	 * Generates general sum games
+	 * @param numGames the number of games to generate.
+	 * @param p set of parameters
+	 * @return the games
+	 */
+	public static ArrayList<MatrixGame> classG(int numGames, Parameters p) {
 		Random r = new Random();
 		ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
-		int[] actions = {10,10};
+		int[] actions = {p.getNumActions(),p.getNumActions()};
 		int[] outcome = {0,0};
 		double[] values = {0.0,0.0};
+		int max = p.getMaxPayoff();
 		for(int i = 0; i < numGames; i++){
 			r.setSeed(i);
 			MatrixGame g = new MatrixGame(2,actions);
-			g.setDescription("G"+i);
+			g.setDescription(""+i);
 			for(int row = 1; row <= actions[0]; row++){
 				for(int col = 1; col <= actions[1]; col++){
 					outcome[0] = row;
 					outcome[1] = col;
-					values[0] = r.nextDouble()*200 - 100;
-					values[1] = r.nextDouble()*200 - 100;
+					values[0] = r.nextDouble()*max;
+					values[1] = r.nextDouble()*max;
+					g.setPayoffs(outcome,values);
+				}
+			}
+			games.add(g);
+		}
+		return games;
+	}
+	
+	/**
+	 * Generates general sum games with default parameters
+	 * @param numGames the number of games to generate.
+	 * @return the games
+	 */
+	public static ArrayList<MatrixGame> classZ(int numGames) {
+		return classZ(numGames, new Parameters());
+	}
+	
+	/**
+	 * Generates zero sum games
+	 * @param numGames the number of games to generate.
+	 * @param p set of parameters
+	 * @return the games
+	 */
+	public static ArrayList<MatrixGame> classZ(int numGames, Parameters p) {
+		Random r = new Random();
+		ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
+		int[] actions = {p.getNumActions(),p.getNumActions()};
+		int[] outcome = {0,0};
+		double[] values = {0.0,0.0};
+		int max = p.getMaxPayoff();
+		for(int i = 0; i < numGames; i++){
+			r.setSeed(i);
+			MatrixGame g = new MatrixGame(2,actions);
+			g.setDescription(""+i);
+			for(int row = 1; row <= actions[0]; row++){
+				for(int col = 1; col <= actions[1]; col++){
+					outcome[0] = row;
+					outcome[1] = col;
+					values[0] = r.nextDouble()*max*2.0 - max;
+					values[1] = values[0] * -1;
 					g.setPayoffs(outcome,values);
 				}
 			}
@@ -185,33 +240,38 @@ public class GameGenerator {
 		return games;
 	}
 	/**
-	 * Generates zero sum games
-	 * @param numGames the number of games to generate.
-	 * @return the games
+	 * Add uncertainty to a single game
+	 * @param mg the game to change
+	 * @param p settings
 	 */
-	public static ArrayList<MatrixGame> classZ(int numGames) {
-		Random r = new Random();
-		ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
-		int[] actions = {10,10};
-		int[] outcome = {0,0};
-		double[] values = {0.0,0.0};
-		for(int i = 0; i < numGames; i++){
-			r.setSeed(i);
-			MatrixGame g = new MatrixGame(2,actions);
-			g.setDescription("G"+i);
-			for(int row = 1; row <= actions[0]; row++){
-				for(int col = 1; col <= actions[1]; col++){
-					outcome[0] = row;
-					outcome[1] = col;
-					values[0] = r.nextDouble()*200 - 100;
-					values[1] = values[0] * -1;
-					//System.out.println(Arrays.toString(outcome));
-					g.setPayoffs(outcome,values);
-					//g.setPayoffs(
-				}
-			}
-			games.add(g);
+	public static void obfuscate(MatrixGame mg, Parameters p){
+		Set<Integer> s = new HashSet<Integer>();
+		Random r = new Random(Integer.parseInt(mg.getDescription()));
+		int act = p.getNumActions();
+		while(s.size() < p.getOutcomeUncertainty()){
+			s.add(r.nextInt());
 		}
-		return games;
+		int[] outcome = {0,0};
+		int globe = 0;
+		double[] temp = {0.0, 0.0};
+		Iterator<Integer> itr = s.iterator();
+		while(itr.hasNext()){
+			globe = itr.next();
+			outcome[0] = globe/act;
+			outcome[1] = globe%act;
+			temp = mg.getPayoffs(outcome);
+			temp[0] -= r.nextDouble()*p.getPayoffUncertainty();
+			temp[1] -= r.nextDouble()*p.getPayoffUncertainty();
+			mg.setPayoffs(outcome,temp);
+		}
+	}
+	/**
+	 * Add uncertainty to a all games
+	 * @param games the games to change
+	 * @param p settings
+	 */
+	public static void obfuscate(ArrayList<MatrixGame> games, Parameters p){
+		for(int i = 0; i < games.size(); i++)
+			obfuscate(games.get(i),p);
 	}
 }

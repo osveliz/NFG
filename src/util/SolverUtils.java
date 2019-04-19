@@ -1,6 +1,7 @@
 package util;
 
 import games.*;
+import java.math.*;
 
 /**
  * Utility functions for game solvers
@@ -69,5 +70,18 @@ public class SolverUtils {
       }
     }
     return payoffs;
+  }
+  
+  /**
+   * Rounding an array to the nearest tenths place
+   * @param a array to round
+   * @return rounded array to nearest tenths place
+   */
+  public static double[] roundTenths(double[] a){
+	  double b[] = new double[a.length];
+	  for(int i = 0; i < b.length; i++){
+		  b[i] = Math.round(a[i]*10.0)/10.0;
+	  }
+	  return b;
   }
 }

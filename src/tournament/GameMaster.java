@@ -19,7 +19,7 @@ public class GameMaster {
 	private static int numGames = 10; //test with however many games you want
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
-	
+	private static Parameters param = new Parameters();
 	/**
 	 * Runs the tournament. Add your agent(s) to the list.
 	 * 
@@ -34,6 +34,22 @@ public class GameMaster {
 		//you can comment these next two lines of code if you've already generated the games
 		//GameGenerator.zeroSum(numGames);
 		//GameGenerator.generalSum(numGames);
+		ArrayList<MatrixGame> single = GameGenerator.classG(1);
+		MatrixGame m = single.get(0);
+		int[] out = {0,0};
+		/*for(int i = 0; i < m.getNumActions(0); i++){
+			for(int j = 0; j < m.getNumActions(0); j++){
+				out[0] = i;
+				out[1] = j;
+				//System.out.println(Arrays.toString(m.getPayoffs(out)));
+			}
+		}*/
+		m.printGame();
+		m.printMatrix();
+		
+			
+		
+		
 		ArrayList<MatrixGame> classA = GameGenerator.classA(numGames);
 		ArrayList<MatrixGame> classG = GameGenerator.classG(numGames);
 		ArrayList<MatrixGame> classZ = GameGenerator.classZ(numGames);
@@ -41,16 +57,21 @@ public class GameMaster {
 		for(int type = 0; type < 3; type++){
 			switch(type){
 				case 0:
-					System.out.println("Zero Sum Tournament");
-					games = classZ;
+					System.out.println("Zero Sum Tournament - no uncertainty");
+					param = new Parameters();
+					games = GameGenerator.classZ(numGames);
+					//param = new Parameters();
 					break;
 				case 1:
-					System.out.println("General Sum Tounament");
-					games = classG;
+					System.out.println("General Sum Tounament - no uncertainty");
+					param = new Parameters();
+					games = GameGenerator.classG(numGames);
+					
 					break;
 				default:
-					System.out.println("Class A Tournament");
-					games = classA;
+					System.out.println("Class A Tournament - no uncertainty");
+					param = new Parameters();
+					games = GameGenerator.classA(numGames);
 					break;
 			}
 			//readGames();
@@ -58,10 +79,9 @@ public class GameMaster {
 				System.out.println("Could Not Read Games");
 				System.exit(0);
 			}
-			
 			computeStrategies(players);
-			
-			
+			//obfuscate
+			GameGenerator.obfuscate(games,param);
 			//compute expected payoffs
 			double[][] payoffMatrix = new double[players.size()][players.size()];
 			double[] wins = new double[players.size()];
@@ -94,15 +114,15 @@ public class GameMaster {
 			
 			//compute results
 			double[] expPayoff = calculateAverageExpectedPayoffs(payoffMatrix);
-			double[] regrets = calculateRegrets(payoffMatrix);
+			//double[] regrets = calculateRegrets(payoffMatrix);
 			double[] stabilities = calculateStabilities(payoffMatrix);
-			double[] reverse = calculateReversePayoffs(payoffMatrix);
+			//double[] reverse = calculateReversePayoffs(payoffMatrix);
 			//print summary regardless of verbose
 			playerArrayPrinter("Total Wins",players, wins);
 			playerArrayPrinter("Overall Average Expected Utility", players, expPayoff);
-			playerArrayPrinter("Tournament Regret",players,regrets);
+			//playerArrayPrinter("Tournament Regret",players,regrets);
 			playerArrayPrinter("Tournament Stabilities",players,stabilities);
-			playerArrayPrinter("Expected Reverse Utility",players,reverse);
+			//playerArrayPrinter("Expected Reverse Utility",players,reverse);
 		}
 		System.exit(0);//just to make sure it exits
 	}

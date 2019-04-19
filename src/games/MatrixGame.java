@@ -1,6 +1,8 @@
 package games;
 
 import util.GenericTensor;
+import java.util.Arrays;
+import util.*;
 
 /**
  * Class implements the straightforward normal form game.
@@ -76,5 +78,32 @@ public class MatrixGame extends Game {
   public void setPayoffs(int[] outcome, double[] values){
     payoffs.getValue(outcome).setPayoffs(values);
   }
+  /**
+   * print all of the outcomes plus payoffs
+   */
+  public void printGame(){
+	 OutcomeIterator itr = iterator();
+	 while(itr.hasNext()) {
+		 int[] outcome = itr.next();
+		 System.out.println(Arrays.toString(outcome)+" "+Arrays.toString(getPayoffs(outcome)));
+		 //System.out.println(Arrays.toString(getPayoffs(outcome, getPayoffs(outcome))));
+	 }
+  }
+  
+	/**
+	 * Print a game as if it was a 2x2 matrix
+	 */
+	public void printMatrix(){
+		int act = nActions[1];
+		int i = 0;
+		OutcomeIterator itr = iterator();
+		while(itr.hasNext()) {
+			int[] outcome = itr.next();
+			System.out.print(Arrays.toString(SolverUtils.roundTenths(getPayoffs(outcome)))+" ");
+			i++;
+			if(i == act)
+				System.out.println();
+		}
+	}
 }
 
