@@ -97,13 +97,24 @@ public class MatrixGame extends Game {
 		int act = nActions[1];
 		int i = 0;
 		OutcomeIterator itr = iterator();
-		while(itr.hasNext()) {
+		int outcome[] = {0,0};
+		for(int row = 1; row <= act; row++){
+			for(int col = 1; col <= act; col++){
+				outcome[0] = row;
+				outcome[1] = col;
+				System.out.print(Arrays.toString(SolverUtils.roundTenths(getPayoffs(outcome)))+" ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+		/*while(itr.hasNext()) {
 			int[] outcome = itr.next();
 			System.out.print(Arrays.toString(SolverUtils.roundTenths(getPayoffs(outcome)))+" ");
 			i++;
 			if(i == act)
 				System.out.println();
 		}
+		System.out.println();*/
 	}
 }
 

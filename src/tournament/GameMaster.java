@@ -16,7 +16,7 @@ import games.*;
 public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
-	private static int numGames = 10; //test with however many games you want
+	private static int numGames = 1; //test with however many games you want
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
@@ -31,57 +31,44 @@ public class GameMaster {
 		players.add(new SolidRock());
 		//add your agent(s) here
 		
-		//you can comment these next two lines of code if you've already generated the games
-		//GameGenerator.zeroSum(numGames);
-		//GameGenerator.generalSum(numGames);
-		ArrayList<MatrixGame> single = GameGenerator.classG(1);
-		MatrixGame m = single.get(0);
-		int[] out = {0,0};
-		/*for(int i = 0; i < m.getNumActions(0); i++){
-			for(int j = 0; j < m.getNumActions(0); j++){
-				out[0] = i;
-				out[1] = j;
-				//System.out.println(Arrays.toString(m.getPayoffs(out)));
-			}
-		}*/
-		m.printGame();
-		m.printMatrix();
 		
-			
-		
-		
-		ArrayList<MatrixGame> classA = GameGenerator.classA(numGames);
-		ArrayList<MatrixGame> classG = GameGenerator.classG(numGames);
-		ArrayList<MatrixGame> classZ = GameGenerator.classZ(numGames);
-		
-		for(int type = 0; type < 3; type++){
-			switch(type){
+		for(int setting = 0; setting < 6; setting++){
+			switch(setting){
 				case 0:
 					System.out.println("Zero Sum Tournament - no uncertainty");
-					param = new Parameters();
-					games = GameGenerator.classZ(numGames);
-					//param = new Parameters();
+					param = new Parameters(100,10,0,0,GameType.ZERO_SUM);
 					break;
 				case 1:
 					System.out.println("General Sum Tounament - no uncertainty");
-					param = new Parameters();
-					games = GameGenerator.classG(numGames);
-					
+					param = new Parameters(100,10,0,0,GameType.GENERAL_SUM);
+					break;
+				case 2:
+					System.out.println("Risk v Reward Tournament - no uncertainty");
+					param = new Parameters(100,10,0,0,GameType.RISK);
+					break;
+				case 3:
+					System.out.println("Risk v Reward Tournament - some uncertainty");
+					param = new Parameters(100,10,4,10,GameType.RISK);
+					break;
+				case 4:
+					System.out.println("Risk v Reward Tournament - a lot of uncertainty");
+					param = new Parameters(100,10,20,20,GameType.RISK);
 					break;
 				default:
-					System.out.println("Class A Tournament - no uncertainty");
+					System.out.println("Basic small general sum game no uncertainty");
 					param = new Parameters();
-					games = GameGenerator.classA(numGames);
 					break;
 			}
-			//readGames();
+			games = GameGenerator.generate(numGames,param);
 			if(games.size()==0){//safety net
-				System.out.println("Could Not Read Games");
+				System.out.println("Could Not Create Games");
 				System.exit(0);
 			}
 			computeStrategies(players);
-			//obfuscate
+			
+			//obfuscate (will not change if outcome uncertainty is zero)
 			GameGenerator.obfuscate(games,param);
+			
 			//compute expected payoffs
 			double[][] payoffMatrix = new double[players.size()][players.size()];
 			double[] wins = new double[players.size()];
@@ -169,6 +156,7 @@ public class GameMaster {
 	
 	/**
 	 * Reads all the games used in the tournament
+	 * ***DEPRICATED***
 	 */
 	public static void readGames(){
 		String type = "";

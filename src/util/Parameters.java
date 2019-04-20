@@ -1,5 +1,6 @@
 package util;
 
+import games.*;
 /**
  * Parameters for a tournament
  */
@@ -12,28 +13,32 @@ public class Parameters{
 	private int outcomeUncertainty;
 	//Payoff uncertainty
 	private int payoffUncertainty;
+	//Game Type
+	private GameType type;
 	/**
-	 * Default parameters
+	 * Default parameters (a small game)
 	 */
 	public Parameters(){
-		maxPayoff = 100;
-		actions = 10;
+		maxPayoff = 10;
+		actions = 2;
 		outcomeUncertainty = 0;
 		payoffUncertainty = 0;
+		type = GameType.GENERAL_SUM;
 	}
 	
 	/**
 	 * Specify each value
 	 * @param m max payoff
-	 * @param a number of actions
+	 * @param a number of actions per player
 	 * @param o outcomes to change
 	 * @param p payoff change amount
 	 */
-	public Parameters(int m, int a, int o, int p){
+	public Parameters(int m, int a, int o, int p, GameType t){
 		maxPayoff = m;
 		actions = a;
 		outcomeUncertainty = o;
 		payoffUncertainty = p;
+		type = t;
 	}
 	
 	/**
@@ -68,8 +73,19 @@ public class Parameters{
 		return payoffUncertainty;
 	}
 	
+	/**
+	 * Get the game type
+	 * @return the game type
+	 */
+	public GameType getGameType(){
+		return type;
+	}
+	
+	/**
+	 * Create a copy of the parameters
+	 */
 	public Parameters copy(){
-		return new Parameters(maxPayoff,actions,outcomeUncertainty,payoffUncertainty);
+		return new Parameters(maxPayoff,actions,outcomeUncertainty,payoffUncertainty, type);
 	}
 }
 	

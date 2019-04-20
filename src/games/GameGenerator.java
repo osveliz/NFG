@@ -249,7 +249,7 @@ public class GameGenerator {
 		Random r = new Random(Integer.parseInt(mg.getDescription()));
 		int act = p.getNumActions();
 		while(s.size() < p.getOutcomeUncertainty()){
-			s.add(r.nextInt());
+			s.add(r.nextInt(act*act));
 		}
 		int[] outcome = {0,0};
 		int globe = 0;
@@ -257,8 +257,10 @@ public class GameGenerator {
 		Iterator<Integer> itr = s.iterator();
 		while(itr.hasNext()){
 			globe = itr.next();
-			outcome[0] = globe/act;
-			outcome[1] = globe%act;
+			//System.out.println("globe "+ globe);//debug
+			outcome[0] = globe/act+1;
+			outcome[1] = globe%act+1;
+			//System.out.println(Arrays.toString(outcome));//debug
 			temp = mg.getPayoffs(outcome);
 			temp[0] -= r.nextDouble()*p.getPayoffUncertainty();
 			temp[1] -= r.nextDouble()*p.getPayoffUncertainty();
@@ -273,5 +275,66 @@ public class GameGenerator {
 	public static void obfuscate(ArrayList<MatrixGame> games, Parameters p){
 		for(int i = 0; i < games.size(); i++)
 			obfuscate(games.get(i),p);
+	}
+	
+	/**
+	 * Generates zero sum games
+	 * @param numGames the number of games to generate.
+	 * @param p set of parameters
+	 * @return the games
+	 */
+	public static ArrayList<MatrixGame> generate(int numGames, Parameters p) {
+		Random r = new Random();
+		GameType type = p.getGameType();
+		ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
+		int[] actions = {p.getNumActions(),p.getNumActions()};
+		int[] outcome = {0,0};
+		double[] values = {0.0,0.0};
+		int max = p.getMaxPayoff();
+		for(int i = 0; i < numGames; i++){
+			r.setSeed(i);
+			MatrixGame g = new MatrixGame(2,actions);
+			g.setDescription(""+i);
+			if(type == GameType.RISK){
+				for(int row = 1; row <= actions[0]; row++){
+					double base = 50 - (row-1) * 2;
+					for(int col = 1; col <= actions[1]; col++){
+						outcome[0] = row;
+						outcome[1] = col;
+						g.setPayoff(outcome,0, base + r.nextGaussian()*(row*2));
+						outcome[0] = col;
+						outcome[1] = row;
+						g.setPayoff(outcome,1, base + r.nextGaussian()*(row*2));
+					}
+				}
+				/*for(int col = 1; col <= actions[1]; col++){
+					double base = 50 - col / 2;
+					for(int row = 1; row <= actions[0]; row++){
+						outcome[0] = row;
+						outcome[1] = col;
+						g.setPayoff(outcome,1, base + r.nextGaussian()*(col+1));
+					}
+				}*/
+			}
+			else{
+				for(int row = 1; row <= actions[0]; row++){
+					for(int col = 1; col <= actions[1]; col++){
+						outcome[0] = row;
+						outcome[1] = col;
+						if(type == GameType.ZERO_SUM){
+							values[0] = r.nextDouble()*max*2.0 - max;
+							values[1] = values[0] * -1;
+						}
+						else{
+							values[0] = r.nextDouble()*max;
+							values[1] = r.nextDouble()*max;
+						}
+						g.setPayoffs(outcome,values);	
+					}
+				}
+			}
+			games.add(g);
+		}
+		return games;
 	}
 }
