@@ -16,7 +16,7 @@ import games.*;
 public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
-	private static int numGames = 1; //test with however many games you want
+	private static int numGames = 10; //use small number when developing, increase when ready to really test
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
@@ -64,6 +64,11 @@ public class GameMaster {
 				System.out.println("Could Not Create Games");
 				System.exit(0);
 			}
+			
+			//update parameters
+			for(int c = 0; c < players.size(); c++)
+				players.get(c).setParameters(param.copy());
+			
 			computeStrategies(players);
 			
 			//obfuscate (will not change if outcome uncertainty is zero)
@@ -110,6 +115,7 @@ public class GameMaster {
 			//playerArrayPrinter("Tournament Regret",players,regrets);
 			playerArrayPrinter("Tournament Stabilities",players,stabilities);
 			//playerArrayPrinter("Expected Reverse Utility",players,reverse);
+			System.out.println();
 		}
 		System.exit(0);//just to make sure it exits
 	}

@@ -3,6 +3,7 @@ package tournament;
 import java.util.ArrayList;
 
 import games.*;
+import util.Parameters;
 
 /**
  * Player agent.
@@ -20,7 +21,7 @@ public abstract class Player
     private int gameNumber;
     protected int playerNumber;
     private ArrayList<StrategyHolder> strategies;//interal saved for later use by GameMaster
-    
+    private Parameters param;
     /**
      * Default Constructor
      */
@@ -112,4 +113,20 @@ public abstract class Player
     		return null;
     	return strategies.get(index).getStrategy(playerNum);
     }
+    
+    /**
+     * Standard setter
+     * @param p new parameter settings
+     */
+    public void setParameters(Parameters p){
+		param = p;
+	}
+	
+	/**
+	 * Standard getter
+	 * @return current parameters
+	 */
+	public Parameters getParameters(){
+		return param;
+	}
 }

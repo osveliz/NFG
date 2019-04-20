@@ -32,6 +32,7 @@ public class Parameters{
 	 * @param a number of actions per player
 	 * @param o outcomes to change
 	 * @param p payoff change amount
+	 * @param t game type
 	 */
 	public Parameters(int m, int a, int o, int p, GameType t){
 		maxPayoff = m;
@@ -83,6 +84,7 @@ public class Parameters{
 	
 	/**
 	 * Create a copy of the parameters
+	 * @return a copy
 	 */
 	public Parameters copy(){
 		return new Parameters(maxPayoff,actions,outcomeUncertainty,payoffUncertainty, type);
