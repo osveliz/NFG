@@ -7,13 +7,12 @@ import games.MixedStrategy;
  *
  */
 public class StrategyHolder {
-	private MixedStrategy ms1;
-	private MixedStrategy ms2;
+	private MixedStrategy ms[];
 	/**
 	 * Default Constructor
 	 */
 	public StrategyHolder(){
-		
+		ms = new MixedStrategy[2];
 	}
 	/**
 	 * Store a strategy for a player
@@ -21,10 +20,11 @@ public class StrategyHolder {
 	 * @param playerNum Row Player = 1, Column Player = 2
 	 */
 	public void addStrategy(MixedStrategy ms, int playerNum){
-		if(playerNum == 1)
+		/*if(playerNum == 1)
 			ms1 = deepCopy(ms);
 		else
-			ms2 = deepCopy(ms);
+			ms2 = deepCopy(ms);*/
+		this.ms[playerNum - 1] = deepCopy(ms);
 	}
 	/**
 	 * Creates a deep copy of a strategy. Avoid accidentally editing a reference later.
@@ -44,11 +44,9 @@ public class StrategyHolder {
 	 * @return the mixed strategy
 	 */
 	public MixedStrategy getStrategy(int playerNum){
-		if(playerNum == 1)
+		/*if(playerNum == 1)
 			return ms1;
-		return ms2;
+		return ms2;*/
+		return ms[playerNum -1];
 	}
-	
-	
-
 }

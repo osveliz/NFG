@@ -14,21 +14,29 @@ import util.Parameters;
  * @author Marcus Gutierrez and Oscar Veliz
  * @version 04/15/2015
  */
-public abstract class Player
-{
+public abstract class Player{
     protected String playerName = "defaultPlayer"; //Overwrite this variable in your player subclass
     protected MatrixGame game;
     private int gameNumber;
     protected int playerNumber;
     private ArrayList<StrategyHolder> strategies;//interal saved for later use by GameMaster
+    private ArrayList<MixedStrategy[]> history;
+    private double lastPayoffs[];
     private Parameters param;
     /**
      * Default Constructor
      */
-    public Player()
-    {
+    public Player(){
         strategies = new ArrayList<StrategyHolder>();
+        history = new ArrayList<MixedStrategy[]>();
+        lastPayoffs = new double[2];
     }
+    
+    /**
+     * Overwrite me
+     */
+    public void initialize(){
+	}
 
     /**
      * Set game
@@ -64,6 +72,17 @@ public abstract class Player
      */
     public int getPlayerNumber(){
     	return playerNumber;
+    }
+    
+    /**
+     * Standard accessor get opponent player number
+     * @return the opponent number
+     */
+    public int getOpponentNumber(){
+		if(playerNumber == 1)
+			return 2;
+		else
+			return 1;
     }
 
     /**
@@ -129,4 +148,51 @@ public abstract class Player
 	public Parameters getParameters(){
 		return param;
 	}
+	
+	/**
+	 * Clear the history
+	 */
+	public void resetHistory(){
+		history.clear();
+		lastPayoffs[0] = 0;
+		lastPayoffs[1] = 0;
+	}
+	
+	/**
+	 * Add to history
+	 * @param s1 strategy for player 1
+	 * @param s2 strategy for player 2
+	 */
+	public void addHistory(MixedStrategy s1, MixedStrategy s2){
+		MixedStrategy ms[] = new MixedStrategy[2];
+		ms[0] = new MixedStrategy(s1.getProbs());
+		ms[1] = new MixedStrategy(s2.getProbs());
+		history.add(ms);
+	}
+	
+	/**
+	 * Add to history
+	 * @param strats strategy for both players
+	 */
+	public void addHistory(MixedStrategy strats[]){
+		this.addHistory(strats[0],strats[1]);
+	}
+	
+	/**
+	 * Informs player of the number of times previously run
+	 * @return number of times previously run
+	 */
+	public int getCurrentRepeatCount(){
+		return history.size();
+	}
+	
+	/**
+	 * Save last payoffs
+	 * @param payoffs both players payoffs {p1,p2}
+	 */
+	public void saveLastPayoffs(double payoffs[]){
+		lastPayoffs[0] = payoffs[0];
+		lastPayoffs[1] = payoffs[1];
+	}
+	
 }

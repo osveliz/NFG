@@ -16,7 +16,14 @@ public class UniformRandom extends Player{
 		super();
         playerName = newName;
 	}
-	
+	/**
+	 * Initialize is called at beginning of tournament.
+	 * Use this time to decide on a strategy depending
+	 * on the parameters.
+	 */
+	public void initialize(){
+		//System.out.println("Uniform Random "+getParameters().getDescription());
+	}
 	
 	/**
      * THIS METHOD SHOULD BE CHANGED 

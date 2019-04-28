@@ -5,6 +5,6 @@ package tournament;
  */
 public enum PlayerState {
 	
-	SOLVE, COMPLETE;
+	INIT, SOLVE, RESULT, COMPLETE;
 
 }

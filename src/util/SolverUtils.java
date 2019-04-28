@@ -2,6 +2,7 @@ package util;
 
 import games.*;
 import java.math.*;
+import java.util.*;
 
 /**
  * Utility functions for game solvers
@@ -84,4 +85,29 @@ public class SolverUtils {
 	  }
 	  return b;
   }
+  /**
+   * Compute Expected Payoff in 2 player game
+   * @param s1 strategy for player 1
+   * @param s2 strategy for player 2
+   * @param mg matrix game being played
+   * @return [player 1 expected payoff, player 2 expected payoff] (-1337) if invalid
+   */
+	public static double[] expectedPayoffs(MixedStrategy s1, MixedStrategy s2, MatrixGame mg){
+		double payoffs[] = {0.0,0.0};
+		boolean valid1 = s1.isValid();
+		boolean valid2 = s2.isValid();
+		List<MixedStrategy> list = new ArrayList<MixedStrategy>();
+		list.add(s1);
+		list.add(s2);
+		if(s1.isValid() && s2.isValid())
+			return computeOutcomePayoffs(mg,new OutcomeDistribution(list));
+		if(!valid1 || !valid2){
+			System.out.println("Detected Invalid Strategy");
+			if(!valid1)
+				payoffs[0] = -1337.0;
+			if(!valid2)
+				payoffs[1] = -1337.0;
+		}
+		return payoffs;
+	}
 }

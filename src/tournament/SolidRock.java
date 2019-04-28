@@ -18,6 +18,15 @@ public class SolidRock extends Player{
 	}
 	
 	/**
+	 * Initialize is called at beginning of tournament.
+	 * Use this time to decide on a strategy depending
+	 * on the parameters.
+	 */
+	public void initialize(){
+		//System.out.println("Solid Rock "+getParameters().getDescription());
+	}
+	
+	/**
      * THIS METHOD SHOULD BE OVERRIDDEN 
      * GameMaster will call this to compute your strategy.
      * @param mg The game your agent will be playing

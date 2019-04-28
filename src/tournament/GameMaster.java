@@ -3,6 +3,7 @@ package tournament;
 import util.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import games.*;
@@ -16,13 +17,16 @@ import games.*;
 public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
+	private static int maxPayoff = 10; //100 is usually pretty good
 	private static int numGames = 10; //use small number when developing, increase when ready to really test
+	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
+	private static final int timeLimit = 1000; //1000 milliseconds
+	
 	/**
 	 * Runs the tournament. Add your agent(s) to the list.
-	 * 
 	 * @param args not using any command line arguments
 	 */
 	public static void main(String[] args) {
@@ -31,77 +35,98 @@ public class GameMaster {
 		players.add(new SolidRock());
 		//add your agent(s) here
 		
-		
-		for(int setting = 0; setting < 6; setting++){
-			switch(setting){
-				case 0:
-					System.out.println("Zero Sum Tournament - no uncertainty");
-					param = new Parameters(100,10,0,0,GameType.ZERO_SUM);
-					break;
-				case 1:
-					System.out.println("General Sum Tounament - no uncertainty");
-					param = new Parameters(100,10,0,0,GameType.GENERAL_SUM);
-					break;
-				case 2:
-					System.out.println("Risk v Reward Tournament - no uncertainty");
-					param = new Parameters(100,10,0,0,GameType.RISK);
-					break;
-				case 3:
-					System.out.println("Risk v Reward Tournament - some uncertainty");
-					param = new Parameters(100,10,4,10,GameType.RISK);
-					break;
-				case 4:
-					System.out.println("Risk v Reward Tournament - a lot of uncertainty");
-					param = new Parameters(100,10,20,20,GameType.RISK);
-					break;
-				default:
-					System.out.println("Basic small general sum game no uncertainty");
-					param = new Parameters();
-					break;
-			}
+		ArrayList<Parameters> settings = new ArrayList<Parameters>();
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
+		settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
+		settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,5,GameType.RISK));
+		for(int setting = 0; setting < settings.size(); setting++){
+			param = settings.get(setting);
+			System.out.println(param.getDescription());
 			games = GameGenerator.generate(numGames,param);
-			if(games.size()==0){//safety net
+			if(games.isEmpty()){//safety net
 				System.out.println("Could Not Create Games");
 				System.exit(0);
 			}
-			
-			//update parameters
-			for(int c = 0; c < players.size(); c++)
-				players.get(c).setParameters(param.copy());
-			
-			computeStrategies(players);
-			
 			//obfuscate (will not change if outcome uncertainty is zero)
+			ArrayList<MatrixGame> gamesCopy = new ArrayList<MatrixGame>();
+			Iterator<MatrixGame> itr = games.iterator();
+			while(itr.hasNext()){
+				gamesCopy.add(new MatrixGame(itr.next()));
+			}
 			GameGenerator.obfuscate(games,param);
+			
+			//update agents with parameters
+			for(int c = 0; c < players.size(); c++){
+				players.get(c).setParameters(param.copy());
+				tryPlayer(new PlayerDriver(players.get(c)));//run init
+			}
+			computeStrategies(players);
 			
 			//compute expected payoffs
 			double[][] payoffMatrix = new double[players.size()][players.size()];
 			double[] wins = new double[players.size()];
 			int numPlayers = players.size();
+			double[] payoffs = new double[2];
+			MixedStrategy strats[] = new MixedStrategy[2];
 			for(int p1 = 0; p1 < numPlayers; p1++) {
 				for(int p2 = p1; p2 < numPlayers; p2++) {
 					for (int game = 0; game < numGames; game++) {
-						Player player1 = players.get(p1);
-						Player player2 = players.get(p2);
-						if(verbose)	System.out.println("Game number" + game);
-						if(verbose) System.out.println(player1.getName()+" vs "+player2.getName());
-						double[] payoffs = match(player1,player2,game);
-						updateResults(payoffMatrix,payoffs,p1,p2,wins);
-						if(verbose) System.out.println(payoffs[0]);
-						if(verbose) System.out.println(payoffs[1]);
-						if(verbose) System.out.println(player2.getName()+" vs "+player1.getName());
-						payoffs = match(player2,player1,game);
-						updateResults(payoffMatrix,payoffs,p2,p1,wins);
-						if(verbose) System.out.println(payoffs[0]);
-						if(verbose) System.out.println(payoffs[1]);
-						if(verbose) System.out.println();
+						if(param.getNumRepeat() < 1){
+							Player player1 = players.get(p1);
+							Player player2 = players.get(p2);
+							if(verbose)	System.out.println("Game number" + game);
+							if(verbose) System.out.println(player1.getName()+" vs "+player2.getName());
+							payoffs = match(player1,player2,game,gamesCopy.get(game));
+							updateResults(payoffMatrix,payoffs,p1,p2,wins);
+							if(verbose) System.out.println(payoffs[0]);
+							if(verbose) System.out.println(payoffs[1]);
+							if(verbose) System.out.println(player2.getName()+" vs "+player1.getName());
+							payoffs = match(player2,player1,game,gamesCopy.get(game));
+							updateResults(payoffMatrix,payoffs,p2,p1,wins);
+							if(verbose) System.out.println(payoffs[0]);
+							if(verbose) System.out.println(payoffs[1]);
+							if(verbose) System.out.println();
+						}
+						else{
+							MatrixGame mg = new MatrixGame(games.get(game));//gives the agent a copy of the game
+							Player player1 = players.get(p1);
+							Player player2 = players.get(p2);
+							player1.resetHistory();
+							player2.resetHistory();
+							player1.setGame(game);//legacy
+							player2.setGame(game);//legacy
+							player1.setGame(new MatrixGame(mg));
+							player2.setGame(new MatrixGame(mg));
+							player1.setPlayerNumber(1);
+							player2.setPlayerNumber(2);
+							for(int repeat = 0; repeat < param.getNumRepeat(); repeat++){
+								payoffs = repeater(player1,player2,gamesCopy.get(game));
+								updateResults(payoffMatrix,payoffs,p1,p2,wins);
+							}
+							player1.resetHistory();
+							player2.resetHistory();
+							player1.setGame(new MatrixGame(mg));
+							player2.setGame(new MatrixGame(mg));
+							player1.setPlayerNumber(2);
+							player2.setPlayerNumber(1);
+							for(int repeat = 0; repeat < param.getNumRepeat(); repeat++){
+								payoffs = repeater(player2,player1,gamesCopy.get(game));
+								updateResults(payoffMatrix,payoffs,p2,p1,wins);
+							}
+							//player1.resetHistory();
+							//player2.resetHistory();
+						}
 					}
 				}
 			}
 			//average the payoff matrix
 			for(int i = 0; i < payoffMatrix.length; i++)
 				for(int j= 0; j < payoffMatrix[i].length; j++)
-					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length);	
+					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length*(param.getNumRepeat()+1));	
 			if(verbose) printMatrix(payoffMatrix,players);
 			
 			//compute results
@@ -119,6 +144,29 @@ public class GameMaster {
 		}
 		System.exit(0);//just to make sure it exits
 	}
+	/**
+	 * Execute two agents, add to their history, return the payoffs
+	 * @param p1 player 1
+	 * @param p2 player 2
+	 * @param game the game they're playing (don't need to copy)
+	 * @return the expected payoffs
+	 */
+	private static double[] repeater(Player p1, Player p2, MatrixGame game){
+		double payoffs[] = new double[2];
+		MixedStrategy strats[] = new MixedStrategy[2];
+		PlayerDriver pd1 = new PlayerDriver(PlayerState.SOLVE,p1);
+		tryPlayer(pd1);
+		strats[0] = pd1.getSolution();
+		PlayerDriver pd2 = new PlayerDriver(PlayerState.SOLVE,p2);
+		tryPlayer(pd2);
+		strats[1] = pd1.getSolution();
+		p1.addHistory(strats);
+		p2.addHistory(strats);
+		payoffs = match(strats[0],strats[1],game);		
+		p1.saveLastPayoffs(payoffs);
+		p2.saveLastPayoffs(payoffs);
+		return payoffs;
+	}
 
 	/**
 	 * Tries to execute a Player class' method by using threads for protection in case
@@ -127,7 +175,7 @@ public class GameMaster {
 	 * @param pDriver The thread that will execute the player
 	 */
 	private static void tryPlayer(PlayerDriver pDriver){
-		int timeLimit = 2000;//2s or 2000ms
+		//int timeLimit = 2000;//2s or 2000ms
 		Thread playerThread = new Thread(pDriver);
 		playerThread.start();
 		for(int sleep = 0; sleep < timeLimit; sleep+=10){
@@ -187,7 +235,7 @@ public class GameMaster {
 	 * @return the payoffs of the match
 	 */
 	public static double[] match(Player p1, Player p2, int gameNumber){
-		MixedStrategy[] strats = new MixedStrategy[2];
+		/*MixedStrategy[] strats = new MixedStrategy[2];
 		int player = 1;
 		strats[0] = p1.getStrategy(gameNumber, player);
 		player = 2;
@@ -212,9 +260,35 @@ public class GameMaster {
 			System.out.println("Invalid strategy for Player: "+p2.getName()+" on game number "+gameNumber);
 			double[] payoffs = {0,-1337};
 			return payoffs;
-		}
-	
+		}*/
+		return SolverUtils.expectedPayoffs(p1.getStrategy(gameNumber,1),p2.getStrategy(gameNumber,2),games.get(gameNumber));
 	}
+	
+	/**
+	 * A single individual match between to players, the first player is row the second is column
+	 * 
+	 * If a strategy for a player is invalid it will assign a payoff of -1337 to that player
+	 * @param p1 row player
+	 * @param p2 column player
+	 * @param gameNumber game
+	 * @param game game if different from global
+	 * @return the payoffs of the match
+	 */
+	public static double[] match(Player p1, Player p2, int gameNumber, MatrixGame game){
+		return SolverUtils.expectedPayoffs(p1.getStrategy(gameNumber,1),p2.getStrategy(gameNumber,2),game);
+	}
+	
+	/**
+	 * Run match using strategies instead of players
+	 * @param s1 player 1 strategy
+	 * @param s2 player 2 strategy
+	 * @param mg game to play
+	 * @return expected payoffs
+	 */
+	public static double[] match(MixedStrategy s1, MixedStrategy s2, MatrixGame mg){
+		return SolverUtils.expectedPayoffs(s1,s2,mg);
+	}
+	
 	/**
 	 * Computes and stores the results of a match given the expected payoffs
 	 * @param matrix Payoff Matrix
@@ -234,7 +308,6 @@ public class GameMaster {
 			wins[p1]++;
 		else
 			wins[p2]++;
-			
 	}
 	
 	/**

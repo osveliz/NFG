@@ -248,8 +248,13 @@ public class GameGenerator {
 		Set<Integer> s = new HashSet<Integer>();
 		Random r = new Random(Integer.parseInt(mg.getDescription()));
 		int act = p.getNumActions();
-		while(s.size() < p.getOutcomeUncertainty()){
-			s.add(r.nextInt(act*act));
+		if(p.getOutcomeUncertainty() >= act*act)//change all actions
+			for(int i = 0; i < act*act; i++)
+				s.add(i);
+		else{
+			while(s.size() < p.getOutcomeUncertainty()){
+				s.add(r.nextInt(act*act));
+			}
 		}
 		int[] outcome = {0,0};
 		int globe = 0;
