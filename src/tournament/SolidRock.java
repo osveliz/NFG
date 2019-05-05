@@ -30,7 +30,7 @@ public class SolidRock extends Player{
      * THIS METHOD SHOULD BE OVERRIDDEN 
      * GameMaster will call this to compute your strategy.
      * @param mg The game your agent will be playing
-     * @param playerNumber Row Player = 1, Column Player = 2
+     * @param playerNumber Row Player = 0, Column Player = 1
      */
     protected MixedStrategy solveGame(MatrixGame mg, int playerNumber){
     	MixedStrategy ms = new MixedStrategy(mg.getNumActions(playerNumber));

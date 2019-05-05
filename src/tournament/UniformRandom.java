@@ -29,7 +29,7 @@ public class UniformRandom extends Player{
      * THIS METHOD SHOULD BE CHANGED 
      * GameMaster will call this to compute your strategy.
      * @param mg The game your agent will be playing
-     * @param playerNumber Row Player = 1, Column Player = 2
+     * @param playerNumber Row Player = 0, Column Player = 1
      */
     protected MixedStrategy solveGame(MatrixGame mg, int playerNumber){
     	return new MixedStrategy(mg.getNumActions(playerNumber));//default uniform random strategy

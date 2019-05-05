@@ -51,13 +51,6 @@ public class GameMaster {
 				System.out.println("Could Not Create Games");
 				System.exit(0);
 			}
-			//obfuscate (will not change if outcome uncertainty is zero)
-			ArrayList<MatrixGame> gamesCopy = new ArrayList<MatrixGame>();
-			Iterator<MatrixGame> itr = games.iterator();
-			while(itr.hasNext()){
-				gamesCopy.add(new MatrixGame(itr.next()));
-			}
-			GameGenerator.obfuscate(games,param);
 			
 			//update agents with parameters
 			for(int c = 0; c < players.size(); c++){
@@ -65,6 +58,13 @@ public class GameMaster {
 				tryPlayer(new PlayerDriver(players.get(c)));//run init
 			}
 			computeStrategies(players);
+			//obfuscate (will not change if outcome uncertainty is zero)
+			ArrayList<MatrixGame> gamesCopy = new ArrayList<MatrixGame>();
+			Iterator<MatrixGame> itr = games.iterator();
+			while(itr.hasNext()){
+				gamesCopy.add(new MatrixGame(itr.next()));
+			}
+			GameGenerator.obfuscate(games,param);
 			
 			//compute expected payoffs
 			double[][] payoffMatrix = new double[players.size()][players.size()];

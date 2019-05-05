@@ -20,9 +20,9 @@ public abstract class Player{
     private int gameNumber;
     protected int playerNumber;
     private ArrayList<StrategyHolder> strategies;//interal saved for later use by GameMaster
-    private ArrayList<MixedStrategy[]> history;
-    private double lastPayoffs[];
-    private Parameters param;
+    protected ArrayList<MixedStrategy[]> history;
+    protected double lastPayoffs[];
+    protected Parameters param;
     /**
      * Default Constructor
      */
@@ -124,7 +124,7 @@ public abstract class Player{
     /**
      * Standard accessor
      * @param index Game Number
-     * @param playerNum Row Player = 1, Column Player = 2
+     * @param playerNum Row Player = 0, Column Player = 1
      * @return the mixed strategy
      */
     public MixedStrategy getStrategy(int index, int playerNum){
@@ -195,4 +195,11 @@ public abstract class Player{
 		lastPayoffs[1] = payoffs[1];
 	}
 	
+	/**
+	 * Get the game history
+	 * @return the game history
+	 */
+	public ArrayList<MixedStrategy[]> getHistory(){
+		return history;
+	}
 }
