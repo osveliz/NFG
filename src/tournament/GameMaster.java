@@ -31,18 +31,20 @@ public class GameMaster {
 	 */
 	public static void main(String[] args) {
 		ArrayList<Player> players = new ArrayList<Player>();
-		players.add(new UniformRandom());
+		//players.add(new UniformRandom());
 		players.add(new SolidRock());
+		players.add(new ManualOverride());
 		//add your agent(s) here
 		
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
-		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
-		settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
-		settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
-		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,5,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
+		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
+		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
+		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,0,0,4,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
 		for(int setting = 0; setting < settings.size(); setting++){
 			param = settings.get(setting);
 			System.out.println(param.getDescription());
@@ -50,14 +52,14 @@ public class GameMaster {
 			if(games.isEmpty()){//safety net
 				System.out.println("Could Not Create Games");
 				System.exit(0);
-			}
-			
+			}			
 			//update agents with parameters
 			for(int c = 0; c < players.size(); c++){
 				players.get(c).setParameters(param.copy());
 				tryPlayer(new PlayerDriver(players.get(c)));//run init
 			}
-			computeStrategies(players);
+			if(settings.get(setting).getNumRepeat() == 0)
+				computeStrategies(players);
 			//obfuscate (will not change if outcome uncertainty is zero)
 			ArrayList<MatrixGame> gamesCopy = new ArrayList<MatrixGame>();
 			Iterator<MatrixGame> itr = games.iterator();
@@ -92,7 +94,7 @@ public class GameMaster {
 							if(verbose) System.out.println();
 						}
 						else{
-							MatrixGame mg = new MatrixGame(games.get(game));//gives the agent a copy of the game
+							MatrixGame mg = new MatrixGame(gamesCopy.get(game));//gives the agent a copy of the game
 							Player player1 = players.get(p1);
 							Player player2 = players.get(p2);
 							player1.resetHistory();
@@ -103,9 +105,15 @@ public class GameMaster {
 							player2.setGame(new MatrixGame(mg));
 							player1.setPlayerNumber(1);
 							player2.setPlayerNumber(2);
+							if(verbose)	System.out.println("Game number" + game);
+							if(verbose) System.out.println(player1.getName()+" vs "+player2.getName());
 							for(int repeat = 0; repeat < param.getNumRepeat(); repeat++){
-								payoffs = repeater(player1,player2,gamesCopy.get(game));
+								if(verbose)System.out.println("repeat "+repeat);
+								payoffs = repeater(player1,player2,games.get(game));
 								updateResults(payoffMatrix,payoffs,p1,p2,wins);
+								if(verbose) System.out.println(payoffs[0]);
+								if(verbose) System.out.println(payoffs[1]);
+								if(verbose) System.out.println(player2.getName()+" vs "+player1.getName());
 							}
 							player1.resetHistory();
 							player2.resetHistory();
@@ -114,11 +122,13 @@ public class GameMaster {
 							player1.setPlayerNumber(2);
 							player2.setPlayerNumber(1);
 							for(int repeat = 0; repeat < param.getNumRepeat(); repeat++){
-								payoffs = repeater(player2,player1,gamesCopy.get(game));
+								if(verbose)System.out.println("repeat "+repeat);
+								payoffs = repeater(player2,player1,games.get(game));
 								updateResults(payoffMatrix,payoffs,p2,p1,wins);
+								if(verbose) System.out.println(payoffs[0]);
+								if(verbose) System.out.println(payoffs[1]);
+								if(verbose) System.out.println(player2.getName()+" vs "+player1.getName());
 							}
-							//player1.resetHistory();
-							//player2.resetHistory();
 						}
 					}
 				}
@@ -178,11 +188,17 @@ public class GameMaster {
 		//int timeLimit = 2000;//2s or 2000ms
 		Thread playerThread = new Thread(pDriver);
 		playerThread.start();
-		for(int sleep = 0; sleep < timeLimit; sleep+=10){
-			if(playerThread.isAlive())
-				try {Thread.sleep(10);} catch (Exception e) {e.printStackTrace();}
-			else
-				return;
+		if(!pDriver.isOverride()){
+			for(int sleep = 0; sleep < timeLimit; sleep+=10){
+				if(playerThread.isAlive())
+					try {Thread.sleep(10);} catch (Exception e) {e.printStackTrace();}
+				else
+					return;
+			}
+		}
+		else{
+			while(playerThread.isAlive())
+				try {Thread.sleep(1000);} catch (Exception e) {e.printStackTrace();}
 		}
 	}
 

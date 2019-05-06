@@ -103,5 +103,13 @@ public class PlayerDriver implements Runnable {
 	public MixedStrategy getSolution(){
 		return solution;
 	}
+	
+	/**
+	 * Is of type Manual Override
+	 * @return true when ManualOverride, false otherwise
+	 */
+	public boolean isOverride(){
+		return player instanceof ManualOverride;
+	}
 
 }

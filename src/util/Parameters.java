@@ -72,7 +72,7 @@ public class Parameters{
 		if(repeat == 0)
 			description += "one shot";
 		else
-			description += "repated "+repeat+" times";
+			description += "repeated "+repeat+" times";
 	}
 	
 	/**
