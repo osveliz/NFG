@@ -159,7 +159,7 @@ public class GameMaster {
 		strats[0] = pd1.getSolution();
 		PlayerDriver pd2 = new PlayerDriver(PlayerState.SOLVE,p2);
 		tryPlayer(pd2);
-		strats[1] = pd1.getSolution();
+		strats[1] = pd2.getSolution();
 		p1.addHistory(strats);
 		p2.addHistory(strats);
 		payoffs = match(strats[0],strats[1],game);		
