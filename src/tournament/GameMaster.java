@@ -93,7 +93,7 @@ public class GameMaster {
 							if(verbose) System.out.println(payoffs[1]);
 							if(verbose) System.out.println();
 						}
-						else{
+						else if(p1 != p2){
 							MatrixGame mg = new MatrixGame(gamesCopy.get(game));//gives the agent a copy of the game
 							Player player1 = players.get(p1);
 							Player player2 = players.get(p2);
@@ -143,6 +143,7 @@ public class GameMaster {
 			double[] expPayoff = calculateAverageExpectedPayoffs(payoffMatrix);
 			//double[] regrets = calculateRegrets(payoffMatrix);
 			double[] stabilities = calculateStabilities(payoffMatrix);
+			double[] minimums = findMinimums(payoffMatrix);
 			//double[] reverse = calculateReversePayoffs(payoffMatrix);
 			//print summary regardless of verbose
 			playerArrayPrinter("Total Wins",players, wins);
@@ -150,6 +151,8 @@ public class GameMaster {
 			//playerArrayPrinter("Tournament Regret",players,regrets);
 			playerArrayPrinter("Tournament Stabilities",players,stabilities);
 			//playerArrayPrinter("Expected Reverse Utility",players,reverse);
+			playerArrayPrinter("Minimum Per Player",players,minimums);
+			
 			System.out.println();
 		}
 		System.exit(0);//just to make sure it exits
@@ -435,5 +438,38 @@ public class GameMaster {
 		System.out.println("\n"+text);
 		for(int i = 0; i < array.length; i++)
 			System.out.println(players.get(i).getName()+"\t"+array[i]);
+	}
+	public static int tester(Player p1, Player p2){
+		int matching = 0;
+		double d;
+		for(int gameNumber = 0; gameNumber < numGames; gameNumber++){
+			d = distance(p1.getStrategy(gameNumber,1),p2.getStrategy(gameNumber,1));
+			if(Math.abs(d) < 0.000001)
+				matching++;
+			d = distance(p1.getStrategy(gameNumber,2),p2.getStrategy(gameNumber,2));
+			if(Math.abs(d) < 0.000001)
+				matching++;
+		}
+		return matching;
+	}
+	public static double[] findMinimums(double[][] matrix){
+		double[] mins = new double[matrix.length];
+		//Arrays.fill(stabilities, Double.NEGATIVE_INFINITY);
+		for (int i = 0; i < matrix.length; i++) {
+			mins[i] = matrix[i][0];
+			for (int j = 1; j < matrix.length; j++) {
+				if (mins[i] > matrix[i][j])
+					mins[i] = matrix[i][j];
+			}
+		}
+		return mins;
+	}
+	public static double distance(MixedStrategy s1, MixedStrategy s2){
+		double sum = 0.0;
+		for(int i = 1; i <= numActions; i++){
+			//System.out.println(s1.getProb(i)+" "+ s2.getProb(i));
+			sum += Math.pow(s1.getProb(i) - s2.getProb(i),2);
+		}
+		return Math.sqrt(sum);
 	}
 }
