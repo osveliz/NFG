@@ -17,8 +17,8 @@ import games.*;
 public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
-	private static int maxPayoff = 10; //100 is usually pretty good
-	private static int numGames = 10; //use small number when developing, increase when ready to really test
+	private static int maxPayoff = 50; //100 is usually pretty good
+	private static int numGames = 100; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
@@ -31,20 +31,29 @@ public class GameMaster {
 	 */
 	public static void main(String[] args) {
 		ArrayList<Player> players = new ArrayList<Player>();
-		//players.add(new UniformRandom());
-		players.add(new SolidRock());
-		players.add(new ManualOverride());
+		players.add(new UniformRandom());
+		//players.add(new SolidRock());
+		//players.add(new Linear());
+		//players.add(new HalfHalf());
+		//players.add(new EpsNE());
+		//CognitiveHierarchy quant = new CognitiveHierarchy();
+		//quant.updateName("qlk");
+		//players.add(quant);
+		//players.add(new QuantalLevelK());
+		//players.add(new CognitiveHierarchy());
+		players.add(new Quantal());
+		//players.add(new ManualOverride());
 		//add your agent(s) here
 		
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
-		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,4,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
+		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
 		for(int setting = 0; setting < settings.size(); setting++){
 			param = settings.get(setting);
 			System.out.println(param.getDescription());

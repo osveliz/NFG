@@ -110,4 +110,122 @@ public class SolverUtils {
 		}
 		return payoffs;
 	}
+	/**
+	 * Best response
+	 */
+	public static MixedStrategy computeBestResponse(MatrixGame mg, int player, MixedStrategy opponentStrat){
+		double[] payoffs = new double[2];
+		int actions = mg.getNumActions(player);
+		MixedStrategy s = new MixedStrategy(actions);
+		s.setZeros();
+		double bestPay = Double.MIN_VALUE;
+		int bestAction= 1;
+		if(player == 0){
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(s, opponentStrat, mg);
+				s.setZeros();
+				if(payoffs[player]> bestPay){
+					bestPay = payoffs[player];
+					bestAction = i;
+				}
+			}
+			s.setProb(bestAction,1.0);
+		}
+		else{
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(opponentStrat,s, mg);
+				s.setZeros();
+				if(payoffs[player]> bestPay){
+					bestPay = payoffs[player];
+					bestAction = i;
+				}
+			}
+			s.setProb(bestAction,1.0);
+		}
+		return s;
+	}
+	public static MixedStrategy computeQuantalBestResponse(MatrixGame mg, int player, MixedStrategy opponentStrat, double lambda){
+		if(lambda < 0){
+			System.out.println("\u03BB should be positive");
+			lambda = 0;
+		}
+		double[] payoffs = new double[2];
+		int actions = mg.getNumActions(player);
+		MixedStrategy s = new MixedStrategy(actions);
+		s.setZeros();
+		MixedStrategy qbr = new MixedStrategy(actions);
+		qbr.setZeros();
+		double bestPay = Double.MIN_VALUE;
+		int bestAction= 1;
+		double sum = 0.0;
+		if(player == 0){
+			//get sum
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(s,opponentStrat,mg);
+				sum += Math.exp(lambda*payoffs[player]);
+				s.setProb(i,0);
+			}
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(s,opponentStrat,mg);
+				qbr.setProb(i,Math.exp(lambda*payoffs[player])/sum);
+				s.setProb(i,0);
+			}
+			//s.setProb(bestAction,1.0);
+		}
+		else{//player == 1
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(opponentStrat,s,mg);
+				sum += Math.exp(lambda*payoffs[player]);
+				s.setProb(i,0);
+			}
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(opponentStrat,s,mg);
+				qbr.setProb(i,Math.exp(lambda*payoffs[player])/sum);
+				s.setProb(i,0);
+			}
+		}
+		return qbr;
+	}
+	/**
+	 * Best response
+	 */
+	public static MixedStrategy computePunishResponse(MatrixGame mg, int player, MixedStrategy opponentStrat){
+		double[] payoffs = new double[2];
+		int actions = mg.getNumActions(player);
+		MixedStrategy s = new MixedStrategy(actions);
+		s.setZeros();
+		double bestPay = Double.MAX_VALUE;
+		int bestAction= 1;
+		if(player == 0){
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(s, opponentStrat, mg);
+				s.setZeros();
+				if(payoffs[1-player] < bestPay){
+					bestPay = payoffs[1-player];
+					bestAction = i;
+				}
+			}
+			s.setProb(bestAction,1.0);
+		}
+		else{
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(opponentStrat,s, mg);
+				s.setZeros();
+				if(payoffs[1-player] < bestPay){
+					bestPay = payoffs[1-player];
+					bestAction = i;
+				}
+			}
+			s.setProb(bestAction,1.0);
+		}
+		return s;
+	}
 }

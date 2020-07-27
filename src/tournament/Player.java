@@ -202,4 +202,11 @@ public abstract class Player{
 	public ArrayList<MixedStrategy[]> getHistory(){
 		return history;
 	}
+	/**
+	 * Update the name
+	 * @param name the new player name
+	 */
+	public void updateName(String name){
+		playerName = name;
+	}
 }

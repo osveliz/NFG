@@ -47,6 +47,15 @@ public final class MixedStrategy {
     Arrays.fill(probs, initialValue);
     probs[0] = 0d;
   }
+  public MixedStrategy(MixedStrategy a, MixedStrategy b, double w) {
+    this.nActions = a.getNumActions();
+    this.probs = new double[nActions + 1];
+    //Arrays.fill(probs, initialValue);
+    probs[0] = 0d;
+    for (int i = 1; i < probs.length; i++) {
+      probs[i] = a.getProb(i)*w + b.getProb(i)*(1-w);
+	}
+  }
 
   /**
    * Returns the number of actions represented
@@ -143,12 +152,31 @@ public final class MixedStrategy {
   public void normalize() {
     probs[0] = 0d;
     double sum = 0d;
+    double countzeroone = 0;
+    for (int i = 1; i < probs.length; i++) {
+	  if(probs[i] < 10e-10)
+	    probs[i] = 0;
+      if(probs[i] == 0 || probs[i] == 1)
+		countzeroone++;
+    }
     for (int i = 1; i < probs.length; i++) {
       sum += probs[i];
     }
+    double change = (sum - 1) * -1 / (probs.length -1 - countzeroone);
     for (int i = 1; i < probs.length; i++) {
-      probs[i] /= sum;
+      //probs[i] /= sum;
+      if(probs[i] == 0 || probs[i] == 1)
+		continue;
+	  if(probs[i] + change < 0)
+		probs[i] = 0;
+	  else if(probs[i] + change > 1)
+		probs[i] = 1;
+	  else
+		probs[i] += change;
     }
+    if(!isValid())//check valid{
+		normalize();
+    
   }
 
   /**
