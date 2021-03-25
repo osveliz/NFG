@@ -123,6 +123,29 @@ public class GameGenerator {
 	public static ArrayList<MatrixGame> classA(int numGames) {
 		return classA(numGames, new Parameters());
 	}
+
+	public static MatrixGame prisonners(){
+		int[] actions = {2,2};
+		MatrixGame mg = new MatrixGame(2, actions);
+		int[] outcome = {1,1};
+		double[] payoffs = {-1,-1};
+		mg.setPayoffs(outcome, payoffs);
+		outcome[1] = 2;
+		payoffs[0] = -4;
+		payoffs[1] = 0;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 2;
+		payoffs[0] = -3;
+		payoffs[1] = -3;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[1] = 1;
+		payoffs[0] = 0;
+		payoffs[1] = -4;
+		mg.setPayoffs(outcome, payoffs);
+
+		return mg;
+
+	}
 	
 	/**
 	 * Generates Class A Games

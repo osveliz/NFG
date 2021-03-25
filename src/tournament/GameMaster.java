@@ -18,7 +18,7 @@ public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 50; //100 is usually pretty good
-	private static int numGames = 100; //use small number when developing, increase when ready to really test
+	private static int numGames = 0; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
@@ -30,6 +30,20 @@ public class GameMaster {
 	 * @param args not using any command line arguments
 	 */
 	public static void main(String[] args) {
+		MatrixGame pris = GameGenerator.prisonners();
+		//pris.printGame();
+		double lambda = 10;
+		System.out.println("lambda = "+lambda);
+		MixedStrategy opponentStrat = new MixedStrategy(2);
+		opponentStrat.setZeros();
+		opponentStrat.setProb(1, 1);
+		MixedStrategy qbr = SolverUtils.computeQuantalBestResponse(pris, 0, opponentStrat, lambda);
+		System.out.println(qbr.toString());
+
+
+
+
+
 		ArrayList<Player> players = new ArrayList<Player>();
 		players.add(new UniformRandom());
 		//players.add(new SolidRock());

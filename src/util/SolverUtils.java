@@ -157,22 +157,30 @@ public class SolverUtils {
 		s.setZeros();
 		MixedStrategy qbr = new MixedStrategy(actions);
 		qbr.setZeros();
-		double bestPay = Double.MIN_VALUE;
-		int bestAction= 1;
+		//double bestPay = Double.MIN_VALUE;
+		//int bestAction= 1;
 		double sum = 0.0;
+		double temp = 0.0;
 		if(player == 0){
 			//get sum
 			for(int i = 1; i <= actions; i++){
 				s.setProb(i,1);
 				payoffs = expectedPayoffs(s,opponentStrat,mg);
-				sum += Math.exp(lambda*payoffs[player]);
+				//sum += Math.exp(lambda*payoffs[player]);
+				temp = Math.exp(lambda*payoffs[player]);
+				//System.out.println(payoffs[player]);
+				//System.out.println(temp);
+				sum += temp;
+				qbr.setProb(i, temp);
 				s.setProb(i,0);
 			}
 			for(int i = 1; i <= actions; i++){
-				s.setProb(i,1);
+				/*s.setProb(i,1);
 				payoffs = expectedPayoffs(s,opponentStrat,mg);
 				qbr.setProb(i,Math.exp(lambda*payoffs[player])/sum);
-				s.setProb(i,0);
+				s.setProb(i,0);*/
+				temp = qbr.getProb(i);
+				qbr.setProb(i, temp / sum);
 			}
 			//s.setProb(bestAction,1.0);
 		}
