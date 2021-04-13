@@ -142,9 +142,49 @@ public class GameGenerator {
 		payoffs[0] = 0;
 		payoffs[1] = -4;
 		mg.setPayoffs(outcome, payoffs);
-
 		return mg;
+	}
+	public static MatrixGame pennies(){
+		int[] actions = {2,2};
+		MatrixGame mg = new MatrixGame(2, actions);
+		int[] outcome = {1,1};
+		double[] payoffs = {+1,-1};
+		mg.setPayoffs(outcome, payoffs);
+		outcome[1] = 2;
+		payoffs[0] = -1;
+		payoffs[1] = 1;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 2;
+		payoffs[0] = 1;
+		payoffs[1] = -1;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[1] = 1;
+		payoffs[0] = -1;
+		payoffs[1] = 1;
+		mg.setPayoffs(outcome, payoffs);
+		return mg;
+	}
 
+	public static MatrixGame battle(){
+		int[] actions = {2,2};
+		MatrixGame mg = new MatrixGame(2, actions);
+		int[] outcome = {1,1};
+		double[] payoffs = {3,2};
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 2;
+		outcome[1] = 2;
+		payoffs[0] = 2;
+		payoffs[1] = 3;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 2;
+		outcome[1] = 1;
+		payoffs[0] = 0;
+		payoffs[1] = 0;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 1;
+		outcome[1] = 2;
+		mg.setPayoffs(outcome, payoffs);
+		return mg;
 	}
 	
 	/**

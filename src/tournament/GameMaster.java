@@ -31,6 +31,9 @@ public class GameMaster {
 	 */
 	public static void main(String[] args) {
 		MatrixGame pris = GameGenerator.prisonners();
+		MatrixGame pennies = GameGenerator.pennies();
+		MatrixGame battle = GameGenerator.battle();
+
 		//pris.printGame();
 		double lambda = 10;
 		System.out.println("lambda = "+lambda);
@@ -39,6 +42,23 @@ public class GameMaster {
 		opponentStrat.setProb(1, 1);
 		MixedStrategy qbr = SolverUtils.computeQuantalBestResponse(pris, 0, opponentStrat, lambda);
 		System.out.println(qbr.toString());
+
+		
+		qbr = SolverUtils.computeQuantalBestResponse(pennies, 0, opponentStrat, lambda);
+		System.out.println(qbr.toString());
+
+		
+		qbr = SolverUtils.computeQuantalBestResponse(battle, 0, opponentStrat, lambda);
+		System.out.println(qbr.toString());
+
+		MixedStrategy robust = SolverUtils.computeRobustBestResponse(pris, 0, lambda);
+		System.out.println(robust.toString());
+		robust = SolverUtils.computeRobustBestResponse(pennies, 0, lambda);
+		System.out.println(robust.toString());
+		robust = SolverUtils.computeRobustBestResponse(battle, 0, lambda);
+		System.out.println(robust.toString());
+
+
 
 
 

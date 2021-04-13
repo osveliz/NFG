@@ -161,42 +161,22 @@ public class SolverUtils {
 		//int bestAction= 1;
 		double sum = 0.0;
 		double temp = 0.0;
-		if(player == 0){
-			//get sum
-			for(int i = 1; i <= actions; i++){
-				s.setProb(i,1);
-				payoffs = expectedPayoffs(s,opponentStrat,mg);
-				//sum += Math.exp(lambda*payoffs[player]);
-				temp = Math.exp(lambda*payoffs[player]);
-				//System.out.println(payoffs[player]);
-				//System.out.println(temp);
-				sum += temp;
-				qbr.setProb(i, temp);
-				s.setProb(i,0);
+		for(int i = 1; i <= actions; i++){
+			s.setProb(i,1);
+			if(player == 0){
+				payoffs = expectedPayoffs(s,opponentStrat,mg);		
 			}
-			for(int i = 1; i <= actions; i++){
-				/*s.setProb(i,1);
-				payoffs = expectedPayoffs(s,opponentStrat,mg);
-				qbr.setProb(i,Math.exp(lambda*payoffs[player])/sum);
-				s.setProb(i,0);*/
-				temp = qbr.getProb(i);
-				qbr.setProb(i, temp / sum);
+			else{
+				payoffs = expectedPayoffs(opponentStrat,s,mg);
 			}
-			//s.setProb(bestAction,1.0);
+			temp = Math.exp(lambda*payoffs[player]);
+			sum += temp;
+			qbr.setProb(i, temp);
+			s.setProb(i,0);
 		}
-		else{//player == 1
-			for(int i = 1; i <= actions; i++){
-				s.setProb(i,1);
-				payoffs = expectedPayoffs(opponentStrat,s,mg);
-				sum += Math.exp(lambda*payoffs[player]);
-				s.setProb(i,0);
-			}
-			for(int i = 1; i <= actions; i++){
-				s.setProb(i,1);
-				payoffs = expectedPayoffs(opponentStrat,s,mg);
-				qbr.setProb(i,Math.exp(lambda*payoffs[player])/sum);
-				s.setProb(i,0);
-			}
+		for(int i = 1; i <= actions; i++){
+			temp = qbr.getProb(i);
+			qbr.setProb(i, temp / sum);
 		}
 		return qbr;
 	}
@@ -235,5 +215,113 @@ public class SolverUtils {
 			s.setProb(bestAction,1.0);
 		}
 		return s;
+	}
+
+	public static MixedStrategy computeRobustBestResponseBackup(MatrixGame mg, int player, double lambda){
+		if(lambda < 0){
+			System.out.println("\u03BB should be positive");
+			lambda = 0;
+		}
+		
+		double[] payoffs = new double[2];
+		int actions = mg.getNumActions(player);
+		MixedStrategy opponentStrat = new MixedStrategy(actions);
+		opponentStrat.setUniform();
+		MixedStrategy s = new MixedStrategy(actions);
+		s = SolverUtils.computeBestResponse(mg, player, opponentStrat);
+
+		double[] punishment = new double[actions];
+		opponentStrat.setZeros();
+		for(int i = 1; i <= actions; i++){
+			opponentStrat.setProb(i,1);//choose action i
+			if(player == 0){
+				payoffs = expectedPayoffs(s,opponentStrat,mg);		
+			}
+			else{
+				payoffs = expectedPayoffs(opponentStrat,s,mg);
+			}
+			opponentStrat.setProb(i,0);//reset action i
+			//punishment[i-1] = payoffs[1-player];
+			punishment[i-1] = -1*payoffs[1-player];
+		}
+
+		/*double max = punishment[0];
+		for(int i = 1; i < actions; i++){
+			if(max < punishment[i]){
+				max = punishment[i];
+			}
+		}*/
+
+
+		MixedStrategy robust = new MixedStrategy(actions);
+		robust.setZeros();
+		double sum = 0.0;
+		double temp = 0.0;
+		for(int i = 0; i < actions; i++){
+			//punishment[i] = max - punishment[i];
+			temp = Math.exp(lambda*punishment[i]);
+			sum += temp;
+			robust.setProb(i+1, temp);
+		}
+		
+		for(int i = 1; i <= actions; i++){
+			temp = robust.getProb(i);
+			robust.setProb(i, temp / sum);
+		}
+		return robust;
+	}
+
+	public static MixedStrategy computeRobustBestResponse(MatrixGame mg, int player, double lambda){
+		if(lambda < 0){
+			System.out.println("\u03BB should be positive");
+			lambda = 0;
+		}
+		
+		double[] payoffs = new double[2];
+		int actions = mg.getNumActions(player);
+		MixedStrategy myStrat = new MixedStrategy(actions);
+		myStrat.setUniform();
+		MixedStrategy opponentStrat = new MixedStrategy(actions);
+		opponentStrat = SolverUtils.computeBestResponse(mg, 1-player, myStrat);
+
+		double[] punishment = new double[actions];
+		myStrat.setZeros();
+		for(int i = 1; i <= actions; i++){
+			myStrat.setProb(i,1);//choose action i
+			if(player == 0){
+				payoffs = expectedPayoffs(myStrat,opponentStrat,mg);
+			}
+			else{
+				payoffs = expectedPayoffs(opponentStrat,myStrat,mg);
+			}
+			myStrat.setProb(i,0);//reset action i
+			//punishment[i-1] = payoffs[1-player];
+			punishment[i-1] = -1*payoffs[1-player];
+		}
+
+		/*double max = punishment[0];
+		for(int i = 1; i < actions; i++){
+			if(max < punishment[i]){
+				max = punishment[i];
+			}
+		}*/
+
+
+		MixedStrategy robust = new MixedStrategy(actions);
+		robust.setZeros();
+		double sum = 0.0;
+		double temp = 0.0;
+		for(int i = 0; i < actions; i++){
+			//punishment[i] = max - punishment[i];
+			temp = Math.exp(lambda*punishment[i]);
+			sum += temp;
+			robust.setProb(i+1, temp);
+		}
+		
+		for(int i = 1; i <= actions; i++){
+			temp = robust.getProb(i);
+			robust.setProb(i, temp / sum);
+		}
+		return robust;
 	}
 }
