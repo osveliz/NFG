@@ -186,6 +186,55 @@ public class GameGenerator {
 		mg.setPayoffs(outcome, payoffs);
 		return mg;
 	}
+
+	public static MatrixGame sample3x3(){
+		int[] actions = {3,3};
+		MatrixGame mg = new MatrixGame(2, actions);
+		int[] outcome = {1,1};
+		double[] payoffs = {2,2};
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 1;
+		outcome[1] = 2;
+		payoffs[0] = 5;
+		payoffs[1] = 4;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 1;
+		outcome[1] = 3;
+		payoffs[0] = 7;
+		payoffs[1] = 2;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 2;
+		outcome[1] = 1;
+		payoffs[0] = 0;
+		payoffs[1] = 5;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 2;
+		outcome[1] = 2;
+		payoffs[0] = 4;
+		payoffs[1] = 0;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 2;
+		outcome[1] = 3;
+		payoffs[0] = 3;
+		payoffs[1] = 5;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 3;
+		outcome[1] = 1;
+		payoffs[0] = 1;
+		payoffs[1] = 2;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 3;
+		outcome[1] = 2;
+		payoffs[0] = 2;
+		payoffs[1] = 3;
+		mg.setPayoffs(outcome, payoffs);
+		outcome[0] = 3;
+		outcome[1] = 3;
+		payoffs[0] = 2;
+		payoffs[1] = 3;
+		mg.setPayoffs(outcome, payoffs);
+		return mg;
+	}
 	
 	/**
 	 * Generates Class A Games

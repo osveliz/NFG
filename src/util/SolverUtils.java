@@ -285,6 +285,7 @@ public class SolverUtils {
 		opponentStrat = SolverUtils.computeBestResponse(mg, 1-player, myStrat);
 
 		double[] punishment = new double[actions];
+		double max = -100000;
 		myStrat.setZeros();
 		for(int i = 1; i <= actions; i++){
 			myStrat.setProb(i,1);//choose action i
@@ -295,8 +296,11 @@ public class SolverUtils {
 				payoffs = expectedPayoffs(opponentStrat,myStrat,mg);
 			}
 			myStrat.setProb(i,0);//reset action i
-			//punishment[i-1] = payoffs[1-player];
-			punishment[i-1] = -1*payoffs[1-player];
+			if(payoffs[1-player] > max){
+				max = payoffs[1-player];
+			}
+			punishment[i-1] = payoffs[1-player];
+			//punishment[i-1] = -1*payoffs[1-player];
 		}
 
 		/*double max = punishment[0];
@@ -307,7 +311,7 @@ public class SolverUtils {
 		}*/
 
 
-		MixedStrategy robust = new MixedStrategy(actions);
+		/*MixedStrategy robust = new MixedStrategy(actions);
 		robust.setZeros();
 		double sum = 0.0;
 		double temp = 0.0;
@@ -322,6 +326,89 @@ public class SolverUtils {
 			temp = robust.getProb(i);
 			robust.setProb(i, temp / sum);
 		}
-		return robust;
+		return robust;*/
+		return logit(punishment,lambda);
+	}
+
+	public static MixedStrategy computeRobust(MatrixGame mg, int player, double lambda){
+		if(lambda < 0){
+			System.out.println("\u03BB should be positive");
+			lambda = 0;
+		}
+		int actions = mg.getNumActions(player);
+		double[] brValues = new double[actions];
+		for(int i=0; i < actions; i++)
+			brValues[i] = -10000;
+		int[] outcome = {1,1};
+		for(int i=1; i<=actions; i++){
+			for(int j =1; j <=actions; j++){
+				if(player == 0){
+					outcome[0]=j;
+					outcome[1]=i;
+				}
+				else{
+					outcome[0]=i;
+					outcome[1]=j;
+				}
+				double p = mg.getPayoff(outcome, player);
+				if(p > brValues[i-1])
+					brValues[i-1] = p;
+			}
+		}
+		//System.out.println(Arrays.toString(brValues));
+		double mostRegret = brValues[0];
+		for(int i = 1; i < actions; i ++)
+			if(brValues[i] > mostRegret)
+				mostRegret = brValues[i];
+		
+		double[] advRegret = new double[actions];
+		for(int i = 0; i < actions; i++){
+			advRegret[i] = mostRegret - brValues[i];
+		}
+		//System.out.println(Arrays.toString(advRegret));
+		return logit(advRegret, lambda);
+	}
+
+	public static MixedStrategy computeAdversary(MatrixGame mg, int player, double lambda){
+		if(lambda < 0){
+			System.out.println("\u03BB should be positive");
+			lambda = 0;
+		}
+		int actions = mg.getNumActions(player);
+		MixedStrategy myStrat = new MixedStrategy(actions);
+		myStrat.setZeros();
+		MixedStrategy opponentStrat = new MixedStrategy(actions);
+		opponentStrat.setUniform();
+		double[] expected = new double[actions];
+		for(int i = 1; i <= actions; i++){
+			myStrat.setProb(i,1);
+			if (player == 0){
+				expected[i-1] = expectedPayoffs(myStrat, opponentStrat, mg)[player];
+			}
+			else{
+				expected[i-1] = expectedPayoffs(opponentStrat, myStrat, mg)[player];
+			}
+			myStrat.setProb(i,0);
+		}
+		return logit(expected, lambda);
+	}
+
+
+
+
+	public static MixedStrategy logit(double[] expected, double lambda){
+		int actions = expected.length;
+		MixedStrategy strat = new MixedStrategy(actions);
+		strat.setZeros();
+		double sum = 0;
+		double[] exp = new double[actions];
+		for(int i = 0; i < actions; i++){
+			exp[i] = Math.exp(lambda*expected[i]);
+			sum += exp[i];
+		}
+		for(int i = 0; i < actions; i++){
+			strat.setProb(i+1, exp[i]/sum);
+		}
+		return strat;
 	}
 }

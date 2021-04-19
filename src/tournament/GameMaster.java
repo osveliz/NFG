@@ -35,7 +35,7 @@ public class GameMaster {
 		MatrixGame battle = GameGenerator.battle();
 
 		//pris.printGame();
-		double lambda = 10;
+		double lambda = .5;
 		System.out.println("lambda = "+lambda);
 		MixedStrategy opponentStrat = new MixedStrategy(2);
 		opponentStrat.setZeros();
@@ -58,7 +58,11 @@ public class GameMaster {
 		robust = SolverUtils.computeRobustBestResponse(battle, 0, lambda);
 		System.out.println(robust.toString());
 
-
+		MatrixGame example = GameGenerator.sample3x3();
+		robust = SolverUtils.computeRobust(example, 0, lambda);
+		System.out.println(robust.toString());
+		MixedStrategy adversary = SolverUtils.computeAdversary(example, 1, lambda);
+		System.out.println(adversary.toString());
 
 
 
