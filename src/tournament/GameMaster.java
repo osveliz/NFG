@@ -18,7 +18,7 @@ public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 50; //100 is usually pretty good
-	private static int numGames = 0; //use small number when developing, increase when ready to really test
+	private static int numGames = 100; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
@@ -35,10 +35,10 @@ public class GameMaster {
 		MatrixGame battle = GameGenerator.battle();
 
 		//pris.printGame();
-		double lambda = .5;
-		System.out.println("lambda = "+lambda);
+		double lambda = 0.75;
+		//System.out.println("lambda = "+lambda);
 		MixedStrategy opponentStrat = new MixedStrategy(2);
-		opponentStrat.setZeros();
+		/*opponentStrat.setZeros();
 		opponentStrat.setProb(1, 1);
 		MixedStrategy qbr = SolverUtils.computeQuantalBestResponse(pris, 0, opponentStrat, lambda);
 		System.out.println(qbr.toString());
@@ -49,27 +49,35 @@ public class GameMaster {
 
 		
 		qbr = SolverUtils.computeQuantalBestResponse(battle, 0, opponentStrat, lambda);
-		System.out.println(qbr.toString());
-
+		System.out.println(qbr.toString());*/
+/*
 		MixedStrategy robust = SolverUtils.computeRobustBestResponse(pris, 0, lambda);
 		System.out.println(robust.toString());
 		robust = SolverUtils.computeRobustBestResponse(pennies, 0, lambda);
 		System.out.println(robust.toString());
 		robust = SolverUtils.computeRobustBestResponse(battle, 0, lambda);
 		System.out.println(robust.toString());
-
-		MatrixGame example = GameGenerator.sample3x3();
-		robust = SolverUtils.computeRobust(example, 0, lambda);
+*/
+		System.out.println();
+		MatrixGame example = GameGenerator.sample3x3_2();
+		MixedStrategy robust = SolverUtils.computeRobust(example, 0, lambda);
 		System.out.println(robust.toString());
-		MixedStrategy adversary = SolverUtils.computeAdversary(example, 1, lambda);
+		robust = SolverUtils.computeRobustResponse(example, 0, lambda);
+		System.out.println(robust.toString());
+
+		System.out.println();
+
+		MixedStrategy adversary = SolverUtils.computeAdversary(example, 0, lambda);
 		System.out.println(adversary.toString());
-
-
-
-
+		adversary = SolverUtils.computeAdversaryResponse(example, 0, lambda);
+		System.out.println(adversary.toString());
 
 		ArrayList<Player> players = new ArrayList<Player>();
 		players.add(new UniformRandom());
+		players.add(new Robust(0));
+		players.add(new Robust(0.25));
+		players.add(new Robust(0.5));
+		players.add(new Robust(2));
 		//players.add(new SolidRock());
 		//players.add(new Linear());
 		//players.add(new HalfHalf());
@@ -79,7 +87,7 @@ public class GameMaster {
 		//players.add(quant);
 		//players.add(new QuantalLevelK());
 		//players.add(new CognitiveHierarchy());
-		players.add(new Quantal());
+		//players.add(new Quantal());
 		//players.add(new ManualOverride());
 		//add your agent(s) here
 		

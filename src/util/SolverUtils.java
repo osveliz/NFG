@@ -330,6 +330,8 @@ public class SolverUtils {
 		return logit(punishment,lambda);
 	}
 
+	
+
 	public static MixedStrategy computeRobust(MatrixGame mg, int player, double lambda){
 		if(lambda < 0){
 			System.out.println("\u03BB should be positive");
@@ -355,7 +357,7 @@ public class SolverUtils {
 					brValues[i-1] = p;
 			}
 		}
-		//System.out.println(Arrays.toString(brValues));
+		//System.out.println(Arrays.toString(brValues));//uncomment
 		double mostRegret = brValues[0];
 		for(int i = 1; i < actions; i ++)
 			if(brValues[i] > mostRegret)
@@ -366,10 +368,16 @@ public class SolverUtils {
 			advRegret[i] = mostRegret - brValues[i];
 		}
 		//System.out.println(Arrays.toString(advRegret));
+
 		return logit(advRegret, lambda);
 	}
 
+	public static MixedStrategy computeRobustResponse(MatrixGame mg, int player, double lambda){
+		return computeBestResponse(mg,player,computeRobust(mg, player, lambda));
+	}
+
 	public static MixedStrategy computeAdversary(MatrixGame mg, int player, double lambda){
+		player = 1 - player;
 		if(lambda < 0){
 			System.out.println("\u03BB should be positive");
 			lambda = 0;
@@ -393,10 +401,12 @@ public class SolverUtils {
 		return logit(expected, lambda);
 	}
 
-
-
+	public static MixedStrategy computeAdversaryResponse(MatrixGame mg, int player, double lambda){
+		return computeBestResponse(mg,player,computeAdversary(mg, player, lambda));
+	}
 
 	public static MixedStrategy logit(double[] expected, double lambda){
+		//System.out.println("input"+Arrays.toString(expected));
 		int actions = expected.length;
 		MixedStrategy strat = new MixedStrategy(actions);
 		strat.setZeros();
@@ -406,6 +416,9 @@ public class SolverUtils {
 			exp[i] = Math.exp(lambda*expected[i]);
 			sum += exp[i];
 		}
+		
+		//System.out.println("exp"+Arrays.toString(exp));
+		//System.out.println("sum="+sum);
 		for(int i = 0; i < actions; i++){
 			strat.setProb(i+1, exp[i]/sum);
 		}
