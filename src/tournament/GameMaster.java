@@ -1,10 +1,14 @@
 package tournament;
 
 import util.*;
+
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import java.io.*;
 
 import games.*;
 
@@ -17,10 +21,10 @@ import games.*;
 public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
-	private static int maxPayoff = 50; //100 is usually pretty good
+	private static int maxPayoff = 100; //100 is usually pretty good
 	private static int numGames = 100; //use small number when developing, increase when ready to really test
-	private static int numActions = 3; //use small number when developing, increase when ready to run tests
-	private static boolean zeroSum = false; //when true use zero sum games, when false use general sum
+	private static int numActions = 20; //use small number when developing, increase when ready to run tests
+	private static boolean zeroSum = true; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
 	private static final int timeLimit = 1000; //1000 milliseconds
@@ -30,14 +34,16 @@ public class GameMaster {
 	 * @param args not using any command line arguments
 	 */
 	public static void main(String[] args) {
-		MatrixGame pris = GameGenerator.prisonners();
+		/*MatrixGame pris = GameGenerator.prisonners();
 		MatrixGame pennies = GameGenerator.pennies();
 		MatrixGame battle = GameGenerator.battle();
+		System.out.println("pennies");
+		System.out.println(SolverUtils.computeMaxMin(pennies, 0).toString());
 
 		//pris.printGame();
 		double lambda = 0.75;
 		//System.out.println("lambda = "+lambda);
-		MixedStrategy opponentStrat = new MixedStrategy(2);
+		MixedStrategy opponentStrat = new MixedStrategy(2);*/
 		/*opponentStrat.setZeros();
 		opponentStrat.setProb(1, 1);
 		MixedStrategy qbr = SolverUtils.computeQuantalBestResponse(pris, 0, opponentStrat, lambda);
@@ -59,7 +65,9 @@ public class GameMaster {
 		System.out.println(robust.toString());
 */
 		System.out.println();
+		double lambda = 0.1;
 		MatrixGame example = GameGenerator.sample3x3_2();
+		example.printMatrix();
 		MixedStrategy robust = SolverUtils.computeRobust(example, 0, lambda);
 		System.out.println(robust.toString());
 		robust = SolverUtils.computeRobustResponse(example, 0, lambda);
@@ -70,18 +78,66 @@ public class GameMaster {
 		MixedStrategy adversary = SolverUtils.computeAdversary(example, 0, lambda);
 		System.out.println(adversary.toString());
 		adversary = SolverUtils.computeAdversaryResponse(example, 0, lambda);
-		System.out.println(adversary.toString());
+		System.out.println(adversary.toString()+"\n\n");
+
+
+
+		/*opponentStrat = new MixedStrategy(3);
+		try {
+			FileWriter myWriter = new FileWriter("test.dat");
+			FileWriter writer2 = new FileWriter("util.dat");
+			myWriter.write("lambda p1 p2 p3\n");
+			writer2.write("lambda EU\n");
+			MixedStrategy q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,0);
+			myWriter.write("0.0 "+q.toStringSpaces()+"\n");
+			writer2.write("0.0 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,0.1);
+			myWriter.write("0.1 "+q.toStringSpaces()+"\n");
+			writer2.write("0.1 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,0.2);
+			myWriter.write("0.2 "+q.toStringSpaces()+"\n");
+			writer2.write("0.2 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,0.3);
+			myWriter.write("0.3 "+q.toStringSpaces()+"\n");
+			writer2.write("0.3 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,0.4);
+			myWriter.write("0.4 "+q.toStringSpaces()+"\n");
+			writer2.write("0.4 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,0.5);
+			myWriter.write("0.5 "+q.toStringSpaces()+"\n");
+			writer2.write("0.5 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,1.0);
+			myWriter.write("1.0 "+q.toStringSpaces()+"\n");
+			writer2.write("1.0 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			q = SolverUtils.computeQuantalBestResponse(example,0,opponentStrat,2.0);
+			myWriter.write("2.0 "+q.toStringSpaces()+"\n");
+			writer2.write("2.0 "+SolverUtils.expectedPayoffs(q,opponentStrat,example)[0]+"\n");
+			myWriter.close();
+			writer2.close();
+			System.out.println("Successfully wrote to the file.");
+		  } catch (IOException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+		  }*/
 
 		ArrayList<Player> players = new ArrayList<Player>();
 		players.add(new UniformRandom());
+		players.add(new EpsNE());
+		players.add(new MaxMin());
+		players.add(new Punish());
 		players.add(new Robust(0));
-		players.add(new Robust(0.25));
-		players.add(new Robust(0.5));
-		players.add(new Robust(2));
+		players.add(new Robust(0.1));
+		players.add(new Robust(0.2));
+		players.add(new Adversary(0.0));
+		players.add(new Adversary(0.1));
+		players.add(new Adversary(0.2));
+		
+		//players.add(new Robust(0.5));
+		//players.add(new Robust(2));
 		//players.add(new SolidRock());
 		//players.add(new Linear());
 		//players.add(new HalfHalf());
-		//players.add(new EpsNE());
+		
 		//CognitiveHierarchy quant = new CognitiveHierarchy();
 		//quant.updateName("qlk");
 		//players.add(quant);
@@ -190,8 +246,13 @@ public class GameMaster {
 			}
 			//average the payoff matrix
 			for(int i = 0; i < payoffMatrix.length; i++)
-				for(int j= 0; j < payoffMatrix[i].length; j++)
-					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length*(param.getNumRepeat()+1));	
+				for(int j= 0; j < payoffMatrix[i].length; j++){
+					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length*(param.getNumRepeat()+1));
+					if(i == j){
+						payoffMatrix[i][j] = payoffMatrix[i][j]/2.0;
+					}
+				}
+
 			if(verbose) printMatrix(payoffMatrix,players);
 			
 			//compute results
@@ -209,6 +270,25 @@ public class GameMaster {
 			playerArrayPrinter("Minimum Per Player",players,minimums);
 			
 			System.out.println();
+
+			try {
+				FileWriter write = new FileWriter("chart.dat");
+				write.write("agent UR ENE MaxMin Punish\n");
+				for(int i= 0; i < payoffMatrix.length; i++)
+					write.write(players.get(i).playerName+ "\t"+payoffMatrix[i][0]+"\t"+payoffMatrix[i][1]+"\t"+payoffMatrix[i][2]+"\t"+payoffMatrix[i][3]+"\n");
+				write.close();
+				System.out.println("Successfully wrote to the file.");
+			  } catch (IOException e) {
+				System.out.println("An error occurred.");
+				e.printStackTrace();
+			  }
+
+			  for(int i = 0; i < payoffMatrix.length; i++){
+				System.out.print(players.get(i).playerName+"\t");
+				for(int j= 0; j < payoffMatrix[i].length; j++)
+					System.out.print(payoffMatrix[i][j]+"\t");
+				System.out.println();
+			  }
 		}
 		System.exit(0);//just to make sure it exits
 	}

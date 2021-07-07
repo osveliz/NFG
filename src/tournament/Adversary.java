@@ -6,20 +6,20 @@ import games.*;
  * Sample agent that always picks Rock (the first action). Remember to put your name in the author field,
  * change the name of the agent, and make your own solveGame(MatrixGame,PlayerNumber) method.
  * @author Oscar
- * @version 2015.10.04
+ * @version 2021.06.17
  */
-public class Robust extends Player{
-	protected final String newName = "Rob"; //Overwrite this variable in your player subclass
+public class Adversary extends Player{
+	protected final String newName = "Adv"; //Overwrite this variable in your player subclass
 	private double lambda = 0.0;
 
 	/**Your constructor should look just like this*/
-	public Robust() {
+	public Adversary() {
 		super();
         playerName = newName;
 	}
 
 	/**Your constructor should look just like this*/
-	public Robust(double lam) {
+	public Adversary(double lam) {
 		super();
         playerName = newName+":"+lam;
 		lambda = lam;
@@ -46,7 +46,7 @@ public class Robust extends Player{
     	for(int a = 2; a <= mg.getNumActions(playerNumber);a++)
     		ms.setProb(a, 0);//set the rest of the strategy to 0
     	return ms;*/
-		return SolverUtils.computeRobustResponse(mg,playerNumber,lambda);
+		return SolverUtils.computeAdversaryResponse(mg,playerNumber,lambda);
     }
 
 }

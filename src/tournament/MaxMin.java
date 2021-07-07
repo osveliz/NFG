@@ -1,18 +1,17 @@
 package tournament;
-
+import util.*;
 import games.*;
 
 /**
- * Sample agent that uses a uniform random strategy. Remember to put your name in the author field,
- * change the name of the agent, and make your own solveGame(MatrixGame,PlayerNumber) method.
+ * MaxMin strategy
  * @author Oscar
- * @version 2015.10.04
+ * @version 2021.06.25
  */
-public class UniformRandom extends Player{
-	protected final String newName = "UR"; //Overwrite this variable in your player subclass
+public class MaxMin extends Player{
+	protected final String newName = "MaxMin"; //Overwrite this variable in your player subclass
 
 	/**Your constructor should look just like this*/
-	public UniformRandom() {
+	public MaxMin() {
 		super();
         playerName = newName;
 	}
@@ -32,7 +31,8 @@ public class UniformRandom extends Player{
      * @param playerNumber Row Player = 0, Column Player = 1
      */
     protected MixedStrategy solveGame(MatrixGame mg, int playerNumber){
-    	return new MixedStrategy(mg.getNumActions(playerNumber));//default uniform random strategy
+    	//return new MixedStrategy(mg.getNumActions(playerNumber));//default uniform random strategy
+		return SolverUtils.computeMaxMin(mg, playerNumber);
     }
 
 }

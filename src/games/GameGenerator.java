@@ -264,7 +264,7 @@ public class GameGenerator {
 		mg.setPayoffs(outcome, payoffs);
 		outcome[0] = 2;
 		outcome[1] = 3;
-		payoffs[0] = 3;
+		payoffs[0] = 3;//changed
 		payoffs[1] = 5;
 		mg.setPayoffs(outcome, payoffs);
 		outcome[0] = 3;

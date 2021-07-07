@@ -247,4 +247,20 @@ public final class MixedStrategy {
     EGAUtils.returnSB(sb);
     return tmp;
   }
+
+  public String toStringSpaces() {
+    StringBuilder sb = EGAUtils.getSB();
+    for (int i = 1; i < probs.length - 1; i++) {
+      sb.append(probs[i]);
+      sb.append(" ");
+    }
+    sb.append(probs[probs.length - 1]);
+    String tmp = sb.toString();
+    EGAUtils.returnSB(sb);
+    return tmp;
+  }
+
+  public void print(){
+    System.out.println(toString());
+  }
 }

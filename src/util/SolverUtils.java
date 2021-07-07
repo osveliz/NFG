@@ -424,4 +424,68 @@ public class SolverUtils {
 		}
 		return strat;
 	}
+
+
+	public static MixedStrategy computeMaxMin(MatrixGame mg, int player){
+		int[] outcome = {0,0};
+		int actions = mg.getNumActions(player);
+		double[] minimums = new double[actions];
+		double payoff = 0;
+		for(int row = 1; row <= actions; row++){
+			minimums[row-1] = Double.MAX_VALUE;
+			for(int col = 1; col <= actions; col++){
+				if(player == 0){
+					outcome[0] = row;
+					outcome[1] = col;
+				}
+				else{
+					outcome[0] = col;
+					outcome[1] = row;
+				}
+				payoff = mg.getPayoffs(outcome)[player];
+				if(minimums[row-1] > payoff)
+					minimums[row-1] = payoff;
+			}
+		}
+		int maxA = 0;
+		for(int i = 1; i < actions; i++)
+			if(minimums[i] > minimums[maxA])
+				maxA = i;
+		MixedStrategy strat = new MixedStrategy(actions);
+		strat.setZeros();
+		strat.setProb(maxA+1, 1.0);
+		return strat;
+	}
+
+	public static MixedStrategy computeMinMax(MatrixGame mg, int player){
+		int[] outcome = {0,0};
+		int opponent = 1-player;
+		int actions = mg.getNumActions(player);
+		double[] maximums = new double[actions];
+		double payoff = 0;
+		for(int row = 1; row <= actions; row++){
+			maximums[row-1] = Double.MIN_VALUE;
+			for(int col = 1; col <= actions; col++){
+				if(opponent == 1){
+					outcome[0] = row;
+					outcome[1] = col;
+				}
+				else{
+					outcome[0] = col;
+					outcome[1] = row;
+				}
+				payoff = mg.getPayoffs(outcome)[opponent];
+				if(maximums[row-1] < payoff)
+					maximums[row-1] = payoff;
+			}
+		}
+		int minA = 0;
+		for(int i = 1; i < actions; i++)
+			if(maximums[i] < maximums[minA])
+				minA = i;
+		MixedStrategy strat = new MixedStrategy(actions);
+		strat.setZeros();
+		strat.setProb(minA+1, 1.0);
+		return strat;
+	}
 }
