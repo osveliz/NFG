@@ -488,4 +488,42 @@ public class SolverUtils {
 		strat.setProb(minA+1, 1.0);
 		return strat;
 	}
+
+	public static MixedStrategy computeNemesis(MatrixGame mg, int player, MixedStrategy playerStrat){
+		
+		double[] payoffs = new double[2];
+		int actions = mg.getNumActions(player);
+		//MixedStrategy opponentStrat = new MixedStrategy(actions);
+		MixedStrategy s = new MixedStrategy(actions);
+		s.setZeros();
+		double worstPay = Double.MAX_VALUE;
+		int worstAction= 1;
+		if(player == 0){
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(playerStrat, s, mg);
+				s.setZeros();
+				if(payoffs[player]< worstPay){
+					worstPay = payoffs[player];
+					worstAction = i;
+				}
+			}
+			s.setProb(worstAction,1.0);
+		}
+		else{
+			for(int i = 1; i <= actions; i++){
+				s.setProb(i,1);
+				payoffs = expectedPayoffs(s,playerStrat, mg);
+				s.setZeros();
+				if(payoffs[player]< worstPay){
+					worstPay = payoffs[player];
+					worstAction = i;
+				}
+			}
+			s.setProb(worstAction,1.0);
+		}
+		return s;
+	}
+
+
 }
