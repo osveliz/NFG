@@ -6,6 +6,6 @@ set style data histograms
 set title "Payoff against Benchmarks" 
 set xlabel "agent"
 set ylabel "average payoff"
-#set yrange [0:]
+set yrange [0:100]
 #plot "chart.dat" using 2: xtic(1) with histogram
-plot for [COL=2:5] 'chart.dat' using COL:xticlabels(1) title columnheader
+plot for [COL=2:6] 'chart.dat' using COL:xticlabels(1) title columnheader

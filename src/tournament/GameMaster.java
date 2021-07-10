@@ -35,6 +35,12 @@ public class GameMaster {
 	 */
 	public static void main(String[] args) {
 		/*MatrixGame pris = GameGenerator.prisonners();
+		MixedStrategy coop = new MixedStrategy(2);
+		coop.setZeros();
+		coop.setProb(2, 1.0);
+		MixedStrategy n = SolverUtils.computeNemesis(pris,1, coop);
+		System.out.println(n.toString());*/
+		/*
 		MatrixGame pennies = GameGenerator.pennies();
 		MatrixGame battle = GameGenerator.battle();
 		System.out.println("pennies");
@@ -128,7 +134,7 @@ public class GameMaster {
 		players.add(new Robust(0));
 		players.add(new Robust(0.1));
 		players.add(new Robust(0.2));
-		players.add(new Adversary(0.0));
+		//players.add(new Adversary(0.0));
 		players.add(new Adversary(0.1));
 		players.add(new Adversary(0.2));
 		
@@ -148,8 +154,8 @@ public class GameMaster {
 		//add your agent(s) here
 		
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
-		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
-		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
+		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
@@ -247,7 +253,8 @@ public class GameMaster {
 			//average the payoff matrix
 			for(int i = 0; i < payoffMatrix.length; i++)
 				for(int j= 0; j < payoffMatrix[i].length; j++){
-					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length*(param.getNumRepeat()+1));
+					//payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames*payoffMatrix.length*(param.getNumRepeat()+1));
+					payoffMatrix[i][j] = payoffMatrix[i][j]/(2*numGames);
 					if(i == j){
 						payoffMatrix[i][j] = payoffMatrix[i][j]/2.0;
 					}
@@ -271,11 +278,31 @@ public class GameMaster {
 			
 			System.out.println();
 
+			double[] nem = new double[numPlayers];
+			MixedStrategy nemesis = new MixedStrategy(numActions);
+			MixedStrategy ms = new MixedStrategy(numActions);
+			for(int g = 0; g < numGames; g++){
+				MatrixGame mg = games.get(g);
+				for(int p = 0; p < players.size(); p++){
+					ms = players.get(p).getStrategy(g,1);
+					nemesis = SolverUtils.computeNemesis(mg, 0, ms);
+					//nemesis = new MixedStrategy(numActions);
+					nem[p] += SolverUtils.expectedPayoffs(ms, nemesis, mg)[0];
+					ms = players.get(p).getStrategy(g,2);
+					nemesis = SolverUtils.computeNemesis(mg, 1, ms);
+					//nemesis = new MixedStrategy(numActions);
+					nem[p] += SolverUtils.expectedPayoffs(ms, nemesis, mg)[1];
+				}
+			}
+			for(int p = 0; p < players.size();p++){
+				nem[p] = nem[p] / (2*numGames);
+			}
+
 			try {
 				FileWriter write = new FileWriter("chart.dat");
-				write.write("agent UR ENE MaxMin Punish\n");
+				write.write("agent UR ENE MaxMin Punish Nemesis\n");
 				for(int i= 0; i < payoffMatrix.length; i++)
-					write.write(players.get(i).playerName+ "\t"+payoffMatrix[i][0]+"\t"+payoffMatrix[i][1]+"\t"+payoffMatrix[i][2]+"\t"+payoffMatrix[i][3]+"\n");
+					write.write(players.get(i).playerName+ "\t"+payoffMatrix[i][0]+"\t"+payoffMatrix[i][1]+"\t"+payoffMatrix[i][2]+"\t"+payoffMatrix[i][3]+"\t"+nem[i]+"\n");
 				write.close();
 				System.out.println("Successfully wrote to the file.");
 			  } catch (IOException e) {
