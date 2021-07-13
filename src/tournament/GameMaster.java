@@ -155,13 +155,41 @@ public class GameMaster {
 		
 		ArrayList<Parameters> settings = new ArrayList<Parameters>();
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
+		/*settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,5,20,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,10,20,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,15,20,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,20,20,0,GameType.GENERAL_SUM));*/
+
 		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,1000,5,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,1000,10,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,1000,15,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,1000,20,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,1000,25,0,GameType.GENERAL_SUM));
+
+
+		/*settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,5,10,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,10,10,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,15,10,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,20,10,0,GameType.GENERAL_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,25,10,0,GameType.GENERAL_SUM));*/
+
+		/*settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,400,5,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,400,10,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,400,15,0,GameType.ZERO_SUM));
+		settings.add(new Parameters(maxPayoff,numActions,400,20,0,GameType.ZERO_SUM));*/
+
+
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,4,5,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,5,1,0,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions,20,0,GameType.RISK));
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,4,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
+		double[][] records = new double[settings.size()][];
 		for(int setting = 0; setting < settings.size(); setting++){
 			param = settings.get(setting);
 			System.out.println(param.getDescription());
@@ -175,15 +203,21 @@ public class GameMaster {
 				players.get(c).setParameters(param.copy());
 				tryPlayer(new PlayerDriver(players.get(c)));//run init
 			}
-			if(settings.get(setting).getNumRepeat() == 0)
-				computeStrategies(players);
-			//obfuscate (will not change if outcome uncertainty is zero)
+			
+			
 			ArrayList<MatrixGame> gamesCopy = new ArrayList<MatrixGame>();
 			Iterator<MatrixGame> itr = games.iterator();
 			while(itr.hasNext()){
 				gamesCopy.add(new MatrixGame(itr.next()));
 			}
+			//obfuscate (will not change if outcome uncertainty is zero)
 			GameGenerator.obfuscate(games,param);
+
+
+			if(settings.get(setting).getNumRepeat() == 0)
+				computeStrategies(players);
+			
+
 			
 			//compute expected payoffs
 			double[][] payoffMatrix = new double[players.size()][players.size()];
@@ -282,7 +316,7 @@ public class GameMaster {
 			MixedStrategy nemesis = new MixedStrategy(numActions);
 			MixedStrategy ms = new MixedStrategy(numActions);
 			for(int g = 0; g < numGames; g++){
-				MatrixGame mg = games.get(g);
+				MatrixGame mg = gamesCopy.get(g);
 				for(int p = 0; p < players.size(); p++){
 					ms = players.get(p).getStrategy(g,1);
 					nemesis = SolverUtils.computeNemesis(mg, 0, ms);
@@ -291,15 +325,17 @@ public class GameMaster {
 					ms = players.get(p).getStrategy(g,2);
 					nemesis = SolverUtils.computeNemesis(mg, 1, ms);
 					//nemesis = new MixedStrategy(numActions);
-					nem[p] += SolverUtils.expectedPayoffs(ms, nemesis, mg)[1];
+					//nem[p] += SolverUtils.expectedPayoffs(ms, nemesis, mg)[1];
+					nem[p] += SolverUtils.expectedPayoffs(nemesis, ms, mg)[1];
 				}
 			}
 			for(int p = 0; p < players.size();p++){
 				nem[p] = nem[p] / (2*numGames);
 			}
+			records[setting] = Arrays.copyOf(nem, nem.length);
 
 			try {
-				FileWriter write = new FileWriter("chart.dat");
+				FileWriter write = new FileWriter("chart"+setting+".dat");
 				write.write("agent UR ENE MaxMin Punish Nemesis\n");
 				for(int i= 0; i < payoffMatrix.length; i++)
 					write.write(players.get(i).playerName+ "\t"+payoffMatrix[i][0]+"\t"+payoffMatrix[i][1]+"\t"+payoffMatrix[i][2]+"\t"+payoffMatrix[i][3]+"\t"+nem[i]+"\n");
@@ -317,6 +353,36 @@ public class GameMaster {
 				System.out.println();
 			  }
 		}
+		for(int i = 0; i < records.length; i++)
+			System.out.println(Arrays.toString(records[i]));
+
+		try {
+			int[] report = {0,1,5,6,7,8};
+			FileWriter write = new FileWriter("nem.dat");
+			String line = "uncertain";
+			for(int i = 0; i < report.length;i++)
+				line = line + "\t" +players.get(report[i]).getName();
+			line = line + "\n";
+			write.write(line);
+			for(int i= 0; i < settings.size(); i++){
+				line = "" + settings.get(i).getPayoffUncertainty();
+				for(int j = 0; j < report.length;j++){
+					line = line + "\t"+ +records[i][report[j]];
+				}
+				line = line +"\n";
+				write.write(line);
+
+				//write.write(settings.get(i).getPayoffUncertainty()+ "\t"+records[i][0]+"\t"+records[i][1]+"\t"+records[i][4]+"\t"+records[i][6]+"\n");
+
+			}
+
+				
+			write.close();
+			System.out.println("Successfully wrote to the file.");
+			} catch (IOException e) {
+			System.out.println("An error occurred.");
+			e.printStackTrace();
+			}
 		System.exit(0);//just to make sure it exits
 	}
 	/**

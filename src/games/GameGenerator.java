@@ -407,7 +407,7 @@ public class GameGenerator {
 	 */
 	public static void obfuscate(MatrixGame mg, Parameters p){
 		Set<Integer> s = new HashSet<Integer>();
-		Random r = new Random(Integer.parseInt(mg.getDescription()));
+		Random r = new Random(Integer.parseInt(mg.getDescription()));//seeded
 		int act = p.getNumActions();
 		if(p.getOutcomeUncertainty() >= act*act)//change all actions
 			for(int i = 0; i < act*act; i++)
@@ -417,10 +417,12 @@ public class GameGenerator {
 				s.add(r.nextInt(act*act));
 			}
 		}
+		r = new Random(Integer.parseInt(mg.getDescription())+1);//reseed
 		int[] outcome = {0,0};
 		int globe = 0;
 		double[] temp = {0.0, 0.0};
 		Iterator<Integer> itr = s.iterator();
+		
 		while(itr.hasNext()){
 			globe = itr.next();
 			//System.out.println("globe "+ globe);//debug
@@ -428,8 +430,36 @@ public class GameGenerator {
 			outcome[1] = globe%act+1;
 			//System.out.println(Arrays.toString(outcome));//debug
 			temp = mg.getPayoffs(outcome);
-			temp[0] -= r.nextDouble()*p.getPayoffUncertainty();
-			temp[1] -= r.nextDouble()*p.getPayoffUncertainty();
+			if(p.getGameType()==GameType.ZERO_SUM){
+				double change = r.nextDouble()*p.getPayoffUncertainty();
+				if(r.nextBoolean())
+					change *= -1;
+				temp[0] += change;
+				temp[1] -= change;
+			}
+			else{
+				int change = 1;
+				if(r.nextBoolean())
+					change = -1;
+				temp[0] += change*r.nextDouble()*p.getPayoffUncertainty();
+				temp[1] += change*r.nextDouble()*p.getPayoffUncertainty();
+				//temp[0] += r.nextGaussian()*p.getPayoffUncertainty();
+				//temp[1] += r.nextGaussian()*p.getPayoffUncertainty();
+			}
+			if(temp[0]>p.getMaxPayoff())
+				temp[0] = p.getMaxPayoff();
+			if(temp[1]>p.getMaxPayoff())
+				temp[1] = p.getMaxPayoff();
+			if(p.getGameType()==GameType.ZERO_SUM){
+				if(temp[0] < p.getMaxPayoff()*-1){
+					temp[0] = p.getMaxPayoff()*-1;
+					temp[1] = p.getMaxPayoff();
+				}
+				if(temp[1] < p.getMaxPayoff()*-1){
+					temp[0] = p.getMaxPayoff();
+					temp[1] = p.getMaxPayoff()*-1;
+				}
+			}
 			mg.setPayoffs(outcome,temp);
 		}
 	}
