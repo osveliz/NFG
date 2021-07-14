@@ -23,7 +23,7 @@ public class GameMaster {
 	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 100; //100 is usually pretty good
 	private static int numGames = 100; //use small number when developing, increase when ready to really test
-	private static int numActions = 20; //use small number when developing, increase when ready to run tests
+	private static int numActions = 10; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = true; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
@@ -190,6 +190,9 @@ public class GameMaster {
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,4,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
 		double[][] records = new double[settings.size()][];
+		double[][] nem_mins = new double[settings.size()][];
+		double[][] nem_maxs = new double[settings.size()][];
+
 		for(int setting = 0; setting < settings.size(); setting++){
 			param = settings.get(setting);
 			System.out.println(param.getDescription());
@@ -313,26 +316,47 @@ public class GameMaster {
 			System.out.println();
 
 			double[] nem = new double[numPlayers];
+			double[] nem_min = new double[numPlayers];
+			for(int i = 0; i<nem_min.length; i++){
+				nem_min[i] = Double.MAX_VALUE;
+			}
+			double[] nem_max = new double[numPlayers];
+			for(int i = 0; i<nem_max.length; i++){
+				nem_min[i] = Double.MIN_VALUE;
+			}
 			MixedStrategy nemesis = new MixedStrategy(numActions);
 			MixedStrategy ms = new MixedStrategy(numActions);
+			double temp = 0.0;
 			for(int g = 0; g < numGames; g++){
 				MatrixGame mg = gamesCopy.get(g);
 				for(int p = 0; p < players.size(); p++){
 					ms = players.get(p).getStrategy(g,1);
 					nemesis = SolverUtils.computeNemesis(mg, 0, ms);
 					//nemesis = new MixedStrategy(numActions);
-					nem[p] += SolverUtils.expectedPayoffs(ms, nemesis, mg)[0];
+					temp = SolverUtils.expectedPayoffs(ms, nemesis, mg)[0];
+					nem[p] += temp;
+					if(nem_min[p] > temp)
+						nem_min[p] = temp;
+					if(nem_max[p] < temp)
+						nem_max[p] = temp;
 					ms = players.get(p).getStrategy(g,2);
 					nemesis = SolverUtils.computeNemesis(mg, 1, ms);
 					//nemesis = new MixedStrategy(numActions);
 					//nem[p] += SolverUtils.expectedPayoffs(ms, nemesis, mg)[1];
-					nem[p] += SolverUtils.expectedPayoffs(nemesis, ms, mg)[1];
+					temp = SolverUtils.expectedPayoffs(nemesis, ms, mg)[1];
+					nem[p] += temp;
+					if(nem_min[p] > temp)
+						nem_min[p] = temp;
+					if(nem_max[p] < temp)
+						nem_max[p] = temp;
 				}
 			}
 			for(int p = 0; p < players.size();p++){
 				nem[p] = nem[p] / (2*numGames);
 			}
 			records[setting] = Arrays.copyOf(nem, nem.length);
+			nem_mins[setting] = Arrays.copyOf(nem_min, nem_min.length);
+			nem_maxs[setting] = Arrays.copyOf(nem_max, nem_max.length);
 
 			try {
 				FileWriter write = new FileWriter("chart"+setting+".dat");
@@ -368,6 +392,8 @@ public class GameMaster {
 				line = "" + settings.get(i).getPayoffUncertainty();
 				for(int j = 0; j < report.length;j++){
 					line = line + "\t"+ +records[i][report[j]];
+					//line = line + "\t"+ +nem_mins[i][report[j]];
+					//line = line + "\t"+ +nem_maxs[i][report[j]];
 				}
 				line = line +"\n";
 				write.write(line);
