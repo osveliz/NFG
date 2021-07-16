@@ -22,12 +22,14 @@ public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 100; //100 is usually pretty good
-	private static int numGames = 100; //use small number when developing, increase when ready to really test
-	private static int numActions = 10; //use small number when developing, increase when ready to run tests
+	private static int numGames = 200; //use small number when developing, increase when ready to really test
+	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = true; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
+	private static ArrayList<MatrixGame> games2 = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
 	private static final int timeLimit = 1000; //1000 milliseconds
+	private static boolean asym = true;
 	
 	/**
 	 * Runs the tournament. Add your agent(s) to the list.
@@ -190,6 +192,8 @@ public class GameMaster {
 		//settings.add(new Parameters(maxPayoff,numActions,0,0,4,GameType.GENERAL_SUM));
 		//settings.add(new Parameters(maxPayoff,numActions,numActions*numActions/2,20,5,GameType.RISK));
 		double[][] records = new double[settings.size()][];
+		double[][] uniforms = new double[settings.size()][];
+		double[][] equilibs = new double[settings.size()][];
 		double[][] nem_mins = new double[settings.size()][];
 		double[][] nem_maxs = new double[settings.size()][];
 
@@ -210,11 +214,20 @@ public class GameMaster {
 			
 			ArrayList<MatrixGame> gamesCopy = new ArrayList<MatrixGame>();
 			Iterator<MatrixGame> itr = games.iterator();
+			MatrixGame tempGame;
 			while(itr.hasNext()){
-				gamesCopy.add(new MatrixGame(itr.next()));
+				tempGame = itr.next();
+				gamesCopy.add(new MatrixGame(tempGame));
+				games2.add(new MatrixGame(tempGame));
+			}
+			itr = games2.iterator();
+			while(itr.hasNext()){
+				tempGame = itr.next();
+				tempGame.setDescription(tempGame.getDescription()+"2");
 			}
 			//obfuscate (will not change if outcome uncertainty is zero)
 			GameGenerator.obfuscate(games,param);
+			GameGenerator.obfuscate(games2,param);
 
 
 			if(settings.get(setting).getNumRepeat() == 0)
@@ -296,6 +309,17 @@ public class GameMaster {
 						payoffMatrix[i][j] = payoffMatrix[i][j]/2.0;
 					}
 				}
+			
+			//what agents earned against uniform random
+			/*double[] t = new double[payoffMatrix.length];
+			for(int i =0; i < t.length; i++)
+				t[i] = payoffMatrix[i][0];
+			uniforms[setting] = Arrays.copyOf(t, t.length);*/
+			//what agents earned against ene
+			/*for(int i =0; i < t.length; i++)
+				t[i] = payoffMatrix[i][1];
+			equilibs[setting] = Arrays.copyOf(t, t.length);*/
+
 
 			if(verbose) printMatrix(payoffMatrix,players);
 			
@@ -326,7 +350,12 @@ public class GameMaster {
 			}
 			MixedStrategy nemesis = new MixedStrategy(numActions);
 			MixedStrategy ms = new MixedStrategy(numActions);
+			MixedStrategy uni = new MixedStrategy(numActions);
+			double[] pu = new double[numPlayers];
+			MixedStrategy ene = new MixedStrategy(numActions);
+			double[] pene = new double[numPlayers];
 			double temp = 0.0;
+
 			for(int g = 0; g < numGames; g++){
 				MatrixGame mg = gamesCopy.get(g);
 				for(int p = 0; p < players.size(); p++){
@@ -339,6 +368,16 @@ public class GameMaster {
 						nem_min[p] = temp;
 					if(nem_max[p] < temp)
 						nem_max[p] = temp;
+
+					uni = players.get(0).getStrategy(g,2);
+					temp = SolverUtils.expectedPayoffs(ms, uni, mg)[0];
+					pu[p] += temp;
+
+					ene = players.get(1).getStrategy(g,2);
+					temp = SolverUtils.expectedPayoffs(ms, ene, mg)[0];
+					pene[p] += temp;
+
+					
 					ms = players.get(p).getStrategy(g,2);
 					nemesis = SolverUtils.computeNemesis(mg, 1, ms);
 					//nemesis = new MixedStrategy(numActions);
@@ -349,14 +388,28 @@ public class GameMaster {
 						nem_min[p] = temp;
 					if(nem_max[p] < temp)
 						nem_max[p] = temp;
+					
+					uni = players.get(0).getStrategy(g,1);
+					temp = SolverUtils.expectedPayoffs(uni, ms, mg)[1];
+					pu[p] += temp;
+
+					ene = players.get(1).getStrategy(g,1);
+					temp = SolverUtils.expectedPayoffs(ene, ms, mg)[1];
+					pene[p] += temp;
 				}
 			}
+			double twogames = 2*numGames;
 			for(int p = 0; p < players.size();p++){
-				nem[p] = nem[p] / (2*numGames);
+				nem[p] = nem[p] / twogames;
+				pu[p] = pu[p] / twogames;
+				pene[p] = pene[p] / twogames;
+
 			}
 			records[setting] = Arrays.copyOf(nem, nem.length);
 			nem_mins[setting] = Arrays.copyOf(nem_min, nem_min.length);
 			nem_maxs[setting] = Arrays.copyOf(nem_max, nem_max.length);
+			uniforms[setting] = Arrays.copyOf(pu, pu.length);
+			equilibs[setting] = Arrays.copyOf(pene, pene.length);
 
 			try {
 				FileWriter write = new FileWriter("chart"+setting+".dat");
@@ -381,29 +434,43 @@ public class GameMaster {
 			System.out.println(Arrays.toString(records[i]));
 
 		try {
-			int[] report = {0,1,5,6,7,8};
+			int[] report = {0,1,2,5,6,7,8};
 			FileWriter write = new FileWriter("nem.dat");
+			FileWriter writeU = new FileWriter("uniform.dat");
+			FileWriter writeE = new FileWriter("equilib.dat");
 			String line = "uncertain";
 			for(int i = 0; i < report.length;i++)
 				line = line + "\t" +players.get(report[i]).getName();
 			line = line + "\n";
 			write.write(line);
+			writeU.write(line);
+			writeE.write(line);
+			String lineU="";
+			String lineE="";
 			for(int i= 0; i < settings.size(); i++){
 				line = "" + settings.get(i).getPayoffUncertainty();
+				lineU = "" + settings.get(i).getPayoffUncertainty();
+				lineE = "" + settings.get(i).getPayoffUncertainty();
 				for(int j = 0; j < report.length;j++){
 					line = line + "\t"+ +records[i][report[j]];
+					lineU = lineU + "\t"+ +uniforms[i][report[j]];
+					lineE = lineE + "\t"+ +equilibs[i][report[j]];
 					//line = line + "\t"+ +nem_mins[i][report[j]];
 					//line = line + "\t"+ +nem_maxs[i][report[j]];
 				}
 				line = line +"\n";
+				lineU = lineU + "\n";
+				lineE = lineE + "\n";
 				write.write(line);
+				writeU.write(lineU);
+				writeE.write(lineE);
 
 				//write.write(settings.get(i).getPayoffUncertainty()+ "\t"+records[i][0]+"\t"+records[i][1]+"\t"+records[i][4]+"\t"+records[i][6]+"\n");
 
 			}
-
-				
 			write.close();
+			writeU.close();
+			writeE.close();
 			System.out.println("Successfully wrote to the file.");
 			} catch (IOException e) {
 			System.out.println("An error occurred.");
@@ -469,13 +536,26 @@ public class GameMaster {
 			drivers.add(new PlayerDriver(PlayerState.SOLVE,p.get(pd)));
 		for(int gameNumber = 0; gameNumber < numGames; gameNumber++){
 			MatrixGame mg = new MatrixGame(games.get(gameNumber));//gives the agent a copy of the game
+			MatrixGame gm = new MatrixGame(games2.get(gameNumber));//for asym
 			for(int playerIndex = 0; playerIndex < p.size(); playerIndex++){
 				Player player = p.get(playerIndex);
-				for(int playerNumber = 1; playerNumber <= 2; playerNumber++){
+				if(asym){
 					player.setGame(gameNumber);//legacy
 					player.setGame(new MatrixGame(mg));
-					player.setPlayerNumber(playerNumber);
+					player.setPlayerNumber(1);
 					tryPlayer(new PlayerDriver(PlayerState.SOLVE,player));
+					player.setGame(new MatrixGame(gm));
+					player.setPlayerNumber(2);
+					tryPlayer(new PlayerDriver(PlayerState.SOLVE,player));
+				}
+				else{
+					for(int playerNumber = 1; playerNumber <= 2; playerNumber++){
+						player.setGame(gameNumber);//legacy
+						player.setGame(new MatrixGame(mg));
+						player.setPlayerNumber(playerNumber);
+						tryPlayer(new PlayerDriver(PlayerState.SOLVE,player));
+					}
+
 				}
 			}				
 		}
