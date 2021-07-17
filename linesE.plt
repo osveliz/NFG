@@ -1,4 +1,5 @@
-#set datafile separator "\t"
+set terminal png
+set output "ene.png"
 set title "Payoff against ENE" 
 set xlabel "Payoff Uncertainty"
 set ylabel "Average Expected Payoff"

@@ -22,7 +22,7 @@ public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 100; //100 is usually pretty good
-	private static int numGames = 200; //use small number when developing, increase when ready to really test
+	private static int numGames = 300; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = true; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();

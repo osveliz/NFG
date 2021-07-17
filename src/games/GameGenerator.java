@@ -438,13 +438,14 @@ public class GameGenerator {
 				temp[1] -= change;
 			}
 			else{
+				double t = r.nextGaussian()*p.getPayoffUncertainty();
 				int change = 1;
 				//if(r.nextBoolean())
 				//	change = -1;
 				//temp[0] += change*r.nextDouble()*p.getPayoffUncertainty();
 				//temp[1] += change*r.nextDouble()*p.getPayoffUncertainty();
-				temp[0] += r.nextGaussian()*p.getPayoffUncertainty();
-				temp[1] += r.nextGaussian()*p.getPayoffUncertainty();
+				temp[0] += t;
+				temp[1] -= t;
 			}
 			if(temp[0]>p.getMaxPayoff())
 				temp[0] = p.getMaxPayoff();
