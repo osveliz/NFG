@@ -22,7 +22,7 @@ public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 100; //100 is usually pretty good
-	private static int numGames = 300; //use small number when developing, increase when ready to really test
+	private static int numGames = 100; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = true; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
@@ -210,8 +210,7 @@ public class GameMaster {
 				players.get(c).setParameters(param.copy());
 				tryPlayer(new PlayerDriver(players.get(c)));//run init
 			}
-			
-			
+						
 			ArrayList<MatrixGame> gamesCopy = new ArrayList<MatrixGame>();
 			Iterator<MatrixGame> itr = games.iterator();
 			MatrixGame tempGame;
@@ -229,13 +228,10 @@ public class GameMaster {
 			GameGenerator.obfuscate(games,param);
 			GameGenerator.obfuscate(games2,param);
 
-
 			if(settings.get(setting).getNumRepeat() == 0)
 				computeStrategies(players);
-			
 
-			
-			//compute expected payoffs
+				//compute expected payoffs
 			double[][] payoffMatrix = new double[players.size()][players.size()];
 			double[] wins = new double[players.size()];
 			int numPlayers = players.size();
@@ -355,12 +351,14 @@ public class GameMaster {
 			MixedStrategy ene = new MixedStrategy(numActions);
 			double[] pene = new double[numPlayers];
 			double temp = 0.0;
-
+			MixedStrategy[][][] saveNem = new MixedStrategy[numGames][numPlayers][2];
+			if(setting == 0)//only on no uncertainty for now
 			for(int g = 0; g < numGames; g++){
 				MatrixGame mg = gamesCopy.get(g);
 				for(int p = 0; p < players.size(); p++){
 					ms = players.get(p).getStrategy(g,1);
 					nemesis = SolverUtils.computeNemesis(mg, 0, ms);
+					saveNem[g][p][0] = new MixedStrategy(nemesis.getProbs());
 					//nemesis = new MixedStrategy(numActions);
 					temp = SolverUtils.expectedPayoffs(ms, nemesis, mg)[0];
 					nem[p] += temp;
@@ -380,6 +378,7 @@ public class GameMaster {
 					
 					ms = players.get(p).getStrategy(g,2);
 					nemesis = SolverUtils.computeNemesis(mg, 1, ms);
+					saveNem[g][p][1] = new MixedStrategy(nemesis.getProbs());
 					//nemesis = new MixedStrategy(numActions);
 					//nem[p] += SolverUtils.expectedPayoffs(ms, nemesis, mg)[1];
 					temp = SolverUtils.expectedPayoffs(nemesis, ms, mg)[1];
@@ -429,9 +428,64 @@ public class GameMaster {
 					System.out.print(payoffMatrix[i][j]+"\t");
 				System.out.println();
 			  }
+
+			  //figure out how to mix here
+			  if(setting == 0){//only on no uncertainty for now 
+			  double[] mixer = new double[10];
+			  MixedStrategy strat;
+			  MixedStrategy mix;
+			  
+			  double[] rates = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+			  double[][] mixedResults = new double[numPlayers][rates.length];
+			   
+			  for(int r = 0; r < rates.length; r++){
+				  for(int g = 0; g < numGames; g++){
+					  MatrixGame mg = gamesCopy.get(g);
+						for(int p = 0; p < numPlayers; p++){
+						  //do row player
+						  strat = players.get(p).getStrategy(g, 1);
+						  ms = players.get(1).getStrategy(g, 2);//ene
+						  nemesis = saveNem[g][p][0];
+						  mix = SolverUtils.interpolate(ms, nemesis, rates[r]);
+						  temp = SolverUtils.expectedPayoffs(strat, mix, mg)[0];
+						  mixedResults[p][r] += temp;
+
+						  //do column player
+						  strat = players.get(p).getStrategy(g, 2);
+						  ms = players.get(1).getStrategy(g, 1);//ene
+						  nemesis = saveNem[g][p][1];
+						  mix = SolverUtils.interpolate(ms, nemesis, rates[r]);
+						  temp = SolverUtils.expectedPayoffs(mix, strat, mg)[1];
+						  mixedResults[p][r] += temp;
+						}
+					}
+				}
+
+				try{
+					FileWriter write = new FileWriter("mixed.dat");
+					String line = "ratio";
+					for(int p = 0 ; p < numPlayers; p++){
+						line = line + "\t" + players.get(p).getName();
+					}
+					write.write(line + "\n");
+					for(int r = 0; r <rates.length; r++){
+						line = rates[r]+"-"+(1-rates[r]);
+						for(int p = 0; p <numPlayers; p++){
+							line = line + "\t"+(mixedResults[p][r]/numGames/2.0);
+						}
+						write.write(line+"\n");
+					}
+					write.close();
+				} catch (IOException e) {
+					System.out.println("An error occurred while mixed");
+					e.printStackTrace();
+				}
+
+			}//end setting==0
+			  
 		}
-		for(int i = 0; i < records.length; i++)
-			System.out.println(Arrays.toString(records[i]));
+		/*for(int i = 0; i < records.length; i++)
+			System.out.println(Arrays.toString(records[i]));*/
 
 		try {
 			int[] report = {0,1,2,5,6,7,8};

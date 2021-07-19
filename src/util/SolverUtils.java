@@ -513,5 +513,12 @@ public class SolverUtils {
 		return s;
 	}
 
+	public static MixedStrategy interpolate (MixedStrategy a, MixedStrategy b,double rate){
+		MixedStrategy c = new MixedStrategy(a.getProbs());
+		for(int i = 0; i < c.getNumActions(); i++)
+			c.setProb(i, a.getProb(i)*(1-rate) + b.getProb(i)*rate );
+		return c;
+	}
+
 
 }

@@ -1,4 +1,6 @@
 #set datafile separator "\t"
+set terminal png
+set output "uniform.png"
 set title "Payoff against Uniform Random" 
 set xlabel "Payoff Uncertainty"
 set ylabel "Average Expected Payoff"

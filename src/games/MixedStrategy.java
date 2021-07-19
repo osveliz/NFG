@@ -23,6 +23,10 @@ public final class MixedStrategy {
     this.nActions = probs.length - 1;
   }
 
+  /*public MixedStrategy(MixedStrategy ms){
+    this(ms.getProbs());
+  }*/
+
   /**
    * Create a new mixed strategy for the given number of actions;
    * defaults to uniform mixture
