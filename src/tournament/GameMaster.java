@@ -22,13 +22,13 @@ public class GameMaster {
 
 	private static boolean verbose = false; //Set to false if you do not want the details
 	private static int maxPayoff = 100; //100 is usually pretty good
-	private static int numGames = 100; //use small number when developing, increase when ready to really test
+	private static int numGames = 10; //use small number when developing, increase when ready to really test
 	private static int numActions = 3; //use small number when developing, increase when ready to run tests
 	private static boolean zeroSum = true; //when true use zero sum games, when false use general sum
 	private static ArrayList<MatrixGame> games = new ArrayList<MatrixGame>();
 	private static ArrayList<MatrixGame> games2 = new ArrayList<MatrixGame>();
 	private static Parameters param = new Parameters();
-	private static final int timeLimit = 1000; //1000 milliseconds
+	private static final int timeLimit = 10000; //1000 milliseconds
 	private static boolean asym = true;
 	
 	/**
@@ -131,14 +131,24 @@ public class GameMaster {
 		ArrayList<Player> players = new ArrayList<Player>();
 		players.add(new UniformRandom());
 		players.add(new EpsNE());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
+		//players.add(new UniformRandom());
 		players.add(new MaxMin());
 		players.add(new Punish());
 		players.add(new Robust(0));
 		players.add(new Robust(0.1));
 		players.add(new Robust(0.2));
-		//players.add(new Adversary(0.0));
+		players.add(new Adversary(0.0));
 		players.add(new Adversary(0.1));
 		players.add(new Adversary(0.2));
+		players.add(new Alpha(0.1,0.5));
 		
 		//players.add(new Robust(0.5));
 		//players.add(new Robust(2));
@@ -469,7 +479,8 @@ public class GameMaster {
 					}
 					write.write(line + "\n");
 					for(int r = 0; r <rates.length; r++){
-						line = rates[r]+"-"+(1-rates[r]);
+						//line = rates[r]+"-"+(1-rates[r]);
+						line = (r+1) + "";
 						for(int p = 0; p <numPlayers; p++){
 							line = line + "\t"+(mixedResults[p][r]/numGames/2.0);
 						}
