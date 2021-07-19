@@ -145,10 +145,12 @@ public class GameMaster {
 		players.add(new Robust(0));
 		players.add(new Robust(0.1));
 		players.add(new Robust(0.2));
-		players.add(new Adversary(0.0));
+		//players.add(new Adversary(0.0));
 		players.add(new Adversary(0.1));
-		players.add(new Adversary(0.2));
+		//players.add(new Adversary(0.2));
+		players.add(new Alpha(0.1,0.0));
 		players.add(new Alpha(0.1,0.5));
+		players.add(new Alpha(0.1,1.0));
 		
 		//players.add(new Robust(0.5));
 		//players.add(new Robust(2));
