@@ -36,6 +36,22 @@ public class GameMaster {
 	 * @param args not using any command line arguments
 	 */
 	public static void main(String[] args) {
+		MatrixGame pris = GameGenerator.prisonners();
+		MixedStrategy defect = new MixedStrategy(2);
+		defect.setZeros();
+		defect.setProb(1, 1);
+		double[] lams = {0.0, 0.1, 0.5, 1.0, 2.5, 5.0, 10.0, 20.0};
+		MixedStrategy s = SolverUtils.computeQuantalBestResponse(pris, 0, defect, lams[0]);
+		double payoff = SolverUtils.expectedPayoffs(s, defect, pris)[0];
+		System.out.println("lambda\tpayoff\t");
+		System.out.println(lams[0]+"\t"+payoff+"\t"+s.toString());
+		for(int i = 1; i<lams.length; i++){
+			s = SolverUtils.computeQuantalBestResponse(pris, 0, defect, lams[i]);
+			payoff = SolverUtils.expectedPayoffs(s, defect, pris)[0];
+			System.out.println(lams[i]+"\t"+payoff+"\t"+s.toString());
+		}
+		//SolverUtils.logit(expected, lambda)
+		//System.exit(0);
 		/*MatrixGame pris = GameGenerator.prisonners();
 		MixedStrategy coop = new MixedStrategy(2);
 		coop.setZeros();
@@ -151,9 +167,9 @@ public class GameMaster {
 		//players.add(new Alpha(0.1,0.0));
 		//players.add(new Alpha(0.1,0.5));
 		//players.add(new Alpha(0.1,1.0));
-		players.add(new Resilient(0.1,0));
-		players.add(new Resilient(0.1,0.5));
-		players.add(new Resilient(0.1,1.0));
+		players.add(new Resilient(2.5,0));
+		players.add(new Resilient(2.5,0.5));
+		players.add(new Resilient(2.5,1.0));
 		
 		//players.add(new Robust(0.5));
 		//players.add(new Robust(2));
@@ -178,12 +194,14 @@ public class GameMaster {
 		settings.add(new Parameters(maxPayoff,numActions,15,20,0,GameType.GENERAL_SUM));
 		settings.add(new Parameters(maxPayoff,numActions,20,20,0,GameType.GENERAL_SUM));*/
 
-		settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,1000,5,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,1000,10,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,1000,15,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,1000,20,0,GameType.GENERAL_SUM));
-		settings.add(new Parameters(maxPayoff,numActions,1000,25,0,GameType.GENERAL_SUM));
+		//GameType gt = GameType.ZERO_SUM;
+		GameType gt = GameType.GENERAL_SUM;
+		settings.add(new Parameters(maxPayoff,numActions,0,0,0,gt));
+		settings.add(new Parameters(maxPayoff,numActions,1000,5,0,gt));
+		settings.add(new Parameters(maxPayoff,numActions,1000,10,0,gt));
+		settings.add(new Parameters(maxPayoff,numActions,1000,15,0,gt));
+		settings.add(new Parameters(maxPayoff,numActions,1000,20,0,gt));
+		settings.add(new Parameters(maxPayoff,numActions,1000,25,0,gt));
 
 
 		/*settings.add(new Parameters(maxPayoff,numActions,0,0,0,GameType.GENERAL_SUM));

@@ -76,8 +76,9 @@ public class Resilient extends Player{
 			v3[i] = alpha*v1[i] + (1-alpha)*v2[i];
 		}
 		//return SolverUtils.logit(v3, lambda);
-		return SolverUtils.computeBestResponse(mg, playerNumber, SolverUtils.logit(v3, lambda));
 		//return SolverUtils.computeBestResponse(mg,playerNumber, SolverUtils.computeBestResponse(mg, 1-playerNumber, SolverUtils.logit(v3, lambda)));
+		//return SolverUtils.computeBestResponse(mg, playerNumber, SolverUtils.logit(v3, lambda));
+		return SolverUtils.computeQuantalBestResponse(mg,playerNumber, SolverUtils.computeBestResponse(mg, 1-playerNumber, SolverUtils.logit(v3, lambda)),lambda);
     }
 
 }
